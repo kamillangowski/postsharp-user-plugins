@@ -1,4 +1,5 @@
 #summary Describes how to start using Log4PostSharp
+#labels Featured
 
 = Introduction =
 
