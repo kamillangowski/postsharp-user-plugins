@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PlugIn xmlns="http://schemas.postsharp.org/1.0/configuration">
+	<SearchPath Directory="bin/{$Configuration}"/>
+	<TaskType Name="Log4PostSharp.Weaver.LogTask"
+			  Implementation="Log4PostSharp.Weaver.LogTask, Log4PostSharp.Weaver">
+		<Dependency TaskType="CodeWeaver"/>
+	</TaskType>
+</PlugIn>
