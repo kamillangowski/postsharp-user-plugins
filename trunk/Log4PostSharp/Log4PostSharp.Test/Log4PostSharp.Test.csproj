@@ -28,8 +28,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL" />
-    <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -55,18 +61,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Log4PostSharp.Test.psproj" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <!-- The following section is conditioned by the presence of the current file
+       in the source tree. If this file is in a binary distribution, the
+       section below will not be executed. Instead, PostSharp should already
+       have been integrated in the default MSBuild process.                       -->
+  <PropertyGroup Condition=" Exists('$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\debug\PostSharp.targets') ">
+    <DontImportPostSharp>True</DontImportPostSharp>
+    <PostSharpDirectory>$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\debug\</PostSharpDirectory>
+    <PostSharpUseCommandLine>True</PostSharpUseCommandLine>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="$(PostSharpDirectory)PostSharp.targets" Condition=" Exists('$(PostSharpDirectory)PostSharp.targets') " />
 </Project>
