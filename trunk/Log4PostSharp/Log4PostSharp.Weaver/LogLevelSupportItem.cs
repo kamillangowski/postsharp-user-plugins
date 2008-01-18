@@ -32,7 +32,7 @@ namespace Log4PostSharp.Weaver {
 	/// <summary>
 	/// Contains information needed to log messages using certain log level.
 	/// </summary>
-	public class LogLevelSupportItem {
+	internal class LogLevelSupportItem {
 		/// <summary>
 		/// log4net.ILog.IsXXXEnabled property getter.
 		/// </summary>

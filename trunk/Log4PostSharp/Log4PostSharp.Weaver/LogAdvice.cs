@@ -63,7 +63,7 @@ namespace Log4PostSharp.Weaver {
 		/// <param name="type">Type to get text representation for.</param>
 		/// <returns>Text representing the <paramref name="type"/></returns>
 		/// <exception cref="ArgumentNullException"><paramref name="type"/> is <see langword="null"/>.</exception>
-		private string GetTypeName(ITypeSignature type) {
+		private static string GetTypeName(ITypeSignature type) {
 			if (type == null) {
 				throw new ArgumentNullException("type");
 			}
@@ -77,16 +77,16 @@ namespace Log4PostSharp.Weaver {
 		/// <param name="method">Method.</param>
 		/// <returns>Signature of the specified method.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="method"/> is <see langword="null"/>.</exception>
-		private string GetMethodSignature(MethodDefDeclaration method) {
+		private static string GetMethodSignature(MethodDefDeclaration method) {
 			if (method == null) {
 				throw new ArgumentNullException("method");
 			}
 
-			string returnType = this.GetTypeName(method.ReturnParameter.ParameterType);
+			string returnType = GetTypeName(method.ReturnParameter.ParameterType);
 
 			string[] parameterTypes = new string[method.Parameters.Count];
 			for (int i = 0; i < parameterTypes.Length; i++) {
-				parameterTypes[i] = this.GetTypeName(method.Parameters[i].ParameterType);
+				parameterTypes[i] = GetTypeName(method.Parameters[i].ParameterType);
 			}
 
 			return string.Format(CultureInfo.InvariantCulture, "{0} {1}({2})", returnType, method.Name, string.Join(", ", parameterTypes));
@@ -99,7 +99,7 @@ namespace Log4PostSharp.Weaver {
 		/// <param name="format">Message text containing the placeholders.</param>
 		/// <returns>Message with placeholders expanded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="format"/> is <see langword="null"/>.</exception>
-		private string GetMessage(MethodDefDeclaration method, string format) {
+		private static string GetMessage(MethodDefDeclaration method, string format) {
 			if (method == null) {
 				throw new ArgumentNullException("method");
 			}
@@ -108,7 +108,7 @@ namespace Log4PostSharp.Weaver {
 			}
 
 			// Get the signature in case it is needed.
-			string signature = this.GetMethodSignature(method);
+			string signature = GetMethodSignature(method);
 
 			// Expand placeholders.
 			string message = format.Replace("{signature}", signature);
@@ -143,7 +143,7 @@ namespace Log4PostSharp.Weaver {
 			if (this.attribute.EntryLevel != LogLevel.None) {
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.EntryLevel);
 
-				string message = this.GetMessage(context.Method, this.attribute.EntryText);
+				string message = GetMessage(context.Method, this.attribute.EntryText);
 
 				// Check if the logger has debug output enabled.
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
@@ -168,7 +168,7 @@ namespace Log4PostSharp.Weaver {
 
 		private void WeaveSuccess(WeavingContext context, InstructionBlock block) {
 			if (this.attribute.ExitLevel != LogLevel.None) {
-				string message = this.GetMessage(context.Method, this.attribute.ExitText);
+				string message = GetMessage(context.Method, this.attribute.ExitText);
 
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.ExitLevel);
 
@@ -205,7 +205,7 @@ namespace Log4PostSharp.Weaver {
 
 		private void WeaveException(WeavingContext context, InstructionBlock block) {
 			if (this.attribute.ExceptionLevel != LogLevel.None) {
-				string message = this.GetMessage(context.Method, this.attribute.ExceptionText);
+				string message = GetMessage(context.Method, this.attribute.ExceptionText);
 
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.ExceptionLevel);
 
