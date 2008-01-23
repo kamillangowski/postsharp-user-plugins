@@ -48,11 +48,6 @@ namespace Log4PostSharp.Weaver {
 		/// </summary>
 		private readonly LogAttribute attribute;
 
-		/// <summary>
-		/// Variable storing ILog instance.
-		/// </summary>
-		private LocalVariableSymbol logVariable = null;
-
 		#endregion
 
 		#region Private Methods
@@ -117,9 +112,6 @@ namespace Log4PostSharp.Weaver {
 		}
 
 		private void WeaveEnter(WeavingContext context, InstructionBlock block) {
-			// Create the local variable for storing ILog instance.
-			this.logVariable = block.DefineLocalVariable(this.parent.IlogType, "~log~{0}");
-
 			InstructionSequence logEntrySequence = context.Method.MethodBody.CreateInstructionSequence();
 			InstructionSequence afterLoggingSequence = context.Method.MethodBody.CreateInstructionSequence();
 
@@ -129,25 +121,16 @@ namespace Log4PostSharp.Weaver {
 			context.InstructionWriter.AttachInstructionSequence(logEntrySequence);
 			context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
-			// Get the type that declares the method.
-			context.InstructionWriter.EmitInstructionType(OpCodeNumber.Ldtoken, context.Method.DeclaringType);
-			context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetTypeFromHandleMethod);
-			// Stack: method_declaring_type.
-			// Get the logger for the method_declaring_type.
-			context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
-			// Stack: logger.
-			// Assign logger to the log variable.
-			context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Stloc_S, this.logVariable);
-			// Stack: .
-
-			if (this.attribute.EntryLevel != LogLevel.None) {
-				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.EntryLevel);
-
+			LogLevel entryLevel = this.attribute.EntryLevel;
+			if (entryLevel != LogLevel.None) {
 				string message = GetMessage(context.Method, this.attribute.EntryText);
 
+				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.EntryLevel);
+				TypeDefDeclaration wovenType = context.Method.DeclaringType;
+				PerTypeLoggingData perTypeLoggingData = this.parent.GetPerTypeLoggingData(wovenType);
+
 				// Check if the logger has debug output enabled.
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
-				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.IsLoggingEnabledGetter);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[entryLevel]);
 				// Stack: isDebugEnabled.
 				// Compare the isDebugEnabled to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -157,7 +140,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call the logging method.
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringMethod);
 				// Stack: .
@@ -167,10 +150,13 @@ namespace Log4PostSharp.Weaver {
 		}
 
 		private void WeaveSuccess(WeavingContext context, InstructionBlock block) {
-			if (this.attribute.ExitLevel != LogLevel.None) {
+			LogLevel exitLevel = this.attribute.ExitLevel;
+			if (exitLevel != LogLevel.None) {
 				string message = GetMessage(context.Method, this.attribute.ExitText);
 
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.ExitLevel);
+				TypeDefDeclaration wovenType = context.Method.DeclaringType;
+				PerTypeLoggingData perTypeLoggingData = this.parent.GetPerTypeLoggingData(wovenType);
 
 				InstructionSequence logSuccessSequence = context.Method.MethodBody.CreateInstructionSequence();
 				InstructionSequence afterLoggingSequence = context.Method.MethodBody.CreateInstructionSequence();
@@ -182,8 +168,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Check if the logger has debug output enabled.
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
-				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.IsLoggingEnabledGetter);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[exitLevel]);
 				// Stack: isDebugEnabled.
 				// Compare the isDebugEnabled to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -193,7 +178,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call the logging method.
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringMethod);
 				// Stack: .
@@ -204,12 +189,15 @@ namespace Log4PostSharp.Weaver {
 		}
 
 		private void WeaveException(WeavingContext context, InstructionBlock block) {
+			LogLevel exceptionLevel = this.attribute.ExceptionLevel;
 			if (this.attribute.ExceptionLevel != LogLevel.None) {
 				string message = GetMessage(context.Method, this.attribute.ExceptionText);
 
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.ExceptionLevel);
+				TypeDefDeclaration wovenType = context.Method.DeclaringType;
+				PerTypeLoggingData perTypeLoggingData = this.parent.GetPerTypeLoggingData(wovenType);
 
-				LocalVariableSymbol localVariable = block.DefineLocalVariable(context.Method.Module.FindType(typeof (Exception), BindingOptions.Default), "~ex~{0}");
+				LocalVariableSymbol localVariable = block.DefineLocalVariable(context.Method.Module.FindType(typeof(Exception), BindingOptions.Default), "~ex~{0}");
 
 				InstructionSequence logExceptionSequence = context.Method.MethodBody.CreateInstructionSequence();
 				InstructionSequence afterLoggingSequence = context.Method.MethodBody.CreateInstructionSequence();
@@ -224,8 +212,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Stloc_S, localVariable);
 				// Stack: .
 				// Call log.get_IsDebugEnabled.
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
-				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.IsLoggingEnabledGetter);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[exceptionLevel]);
 				// Stack: isDebugEnabled.
 				// Push 0 on the stack and check if isDebugEnabled is equal to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -235,7 +222,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call log.Debug(message, ex).
-				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, this.logVariable);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, localVariable);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringExceptionMethod);
@@ -292,14 +279,14 @@ namespace Log4PostSharp.Weaver {
 
 		public void Weave(WeavingContext context, InstructionBlock block) {
 			switch (context.JoinPoint.JoinPointKind) {
-				case JoinPointKinds.BeforeMethodBody:
-					this.WeaveEnter(context, block);
+				case JoinPointKinds.AfterMethodBodyException:
+					this.WeaveException(context, block);
 					break;
 				case JoinPointKinds.AfterMethodBodySuccess:
 					this.WeaveSuccess(context, block);
 					break;
-				case JoinPointKinds.AfterMethodBodyException:
-					this.WeaveException(context, block);
+				case JoinPointKinds.BeforeMethodBody:
+					this.WeaveEnter(context, block);
 					break;
 			}
 		}

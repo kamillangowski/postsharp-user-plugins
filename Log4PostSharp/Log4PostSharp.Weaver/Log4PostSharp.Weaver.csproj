@@ -47,6 +47,7 @@
     <Compile Include="LogAdvice.cs" />
     <Compile Include="LogLevelSupportItem.cs" />
     <Compile Include="LogTask.cs" />
+    <Compile Include="PerTypeLoggingData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
