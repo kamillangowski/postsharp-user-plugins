@@ -244,11 +244,6 @@ namespace Log4PostSharp.Weaver {
 				// Stack: .
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Rethrow);
 				context.InstructionWriter.DetachInstructionSequence();
-
-				context.InstructionWriter.AttachInstructionSequence(afterLoggingSequence);
-				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
-				context.InstructionWriter.EmitInstruction(OpCodeNumber.Nop);
-				context.InstructionWriter.DetachInstructionSequence();
 			} else {
 				InstructionSequence rethrowSequence = context.Method.MethodBody.CreateInstructionSequence();
 				block.AddInstructionSequence(rethrowSequence, NodePosition.Before, null);
