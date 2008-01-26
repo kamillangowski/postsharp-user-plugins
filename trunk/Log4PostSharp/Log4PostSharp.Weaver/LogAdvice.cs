@@ -112,15 +112,6 @@ namespace Log4PostSharp.Weaver {
 		}
 
 		private void WeaveEnter(WeavingContext context, InstructionBlock block) {
-			InstructionSequence logEntrySequence = context.Method.MethodBody.CreateInstructionSequence();
-			InstructionSequence afterLoggingSequence = context.Method.MethodBody.CreateInstructionSequence();
-
-			block.AddInstructionSequence(logEntrySequence, NodePosition.Before, null);
-			block.AddInstructionSequence(afterLoggingSequence, NodePosition.After, logEntrySequence);
-
-			context.InstructionWriter.AttachInstructionSequence(logEntrySequence);
-			context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
-
 			LogLevel entryLevel = this.attribute.EntryLevel;
 			if (entryLevel != LogLevel.None) {
 				string message = GetMessage(context.Method, this.attribute.EntryText);
@@ -128,6 +119,15 @@ namespace Log4PostSharp.Weaver {
 				LogLevelSupportItem supportItem = this.parent.GetSupportItem(this.attribute.EntryLevel);
 				TypeDefDeclaration wovenType = context.Method.DeclaringType;
 				PerTypeLoggingData perTypeLoggingData = this.parent.GetPerTypeLoggingData(wovenType);
+
+				InstructionSequence logEntrySequence = context.Method.MethodBody.CreateInstructionSequence();
+				InstructionSequence afterLoggingSequence = context.Method.MethodBody.CreateInstructionSequence();
+
+				block.AddInstructionSequence(logEntrySequence, NodePosition.Before, null);
+				block.AddInstructionSequence(afterLoggingSequence, NodePosition.After, logEntrySequence);
+
+				context.InstructionWriter.AttachInstructionSequence(logEntrySequence);
+				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Check if the logger has debug output enabled.
 				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[entryLevel]);
@@ -144,9 +144,15 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringMethod);
 				// Stack: .
+
+				// Commit changes and detach the instruction sequence.
+				context.InstructionWriter.DetachInstructionSequence();
+
+				context.InstructionWriter.AttachInstructionSequence(afterLoggingSequence);
+				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
+				context.InstructionWriter.EmitInstruction(OpCodeNumber.Nop);
+				context.InstructionWriter.DetachInstructionSequence();
 			}
-			// Commit changes and detach the instruction sequence.
-			context.InstructionWriter.DetachInstructionSequence();
 		}
 
 		private void WeaveSuccess(WeavingContext context, InstructionBlock block) {
@@ -184,6 +190,11 @@ namespace Log4PostSharp.Weaver {
 				// Stack: .
 
 				// Commit changes and detach the instruction sequence.
+				context.InstructionWriter.DetachInstructionSequence();
+
+				context.InstructionWriter.AttachInstructionSequence(afterLoggingSequence);
+				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
+				context.InstructionWriter.EmitInstruction(OpCodeNumber.Nop);
 				context.InstructionWriter.DetachInstructionSequence();
 			}
 		}
@@ -232,6 +243,11 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.AttachInstructionSequence(afterLoggingSequence);
 				// Stack: .
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Rethrow);
+				context.InstructionWriter.DetachInstructionSequence();
+
+				context.InstructionWriter.AttachInstructionSequence(afterLoggingSequence);
+				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
+				context.InstructionWriter.EmitInstruction(OpCodeNumber.Nop);
 				context.InstructionWriter.DetachInstructionSequence();
 			} else {
 				InstructionSequence rethrowSequence = context.Method.MethodBody.CreateInstructionSequence();
