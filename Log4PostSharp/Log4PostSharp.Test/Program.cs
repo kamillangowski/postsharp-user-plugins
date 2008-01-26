@@ -24,5 +24,11 @@ namespace Log4PostSharp.Test {
 			MethodWithGuidReturnValue();
 			MethodWithIntReturnValue();
 		}
+
+		public class Subprogram {
+			[Log]
+			public Subprogram() {
+			}
+		}
 	}
 }
