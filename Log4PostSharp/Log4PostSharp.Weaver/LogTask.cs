@@ -174,19 +174,28 @@ namespace Log4PostSharp.Weaver {
 					// Build an advice based on this custom attribute. 
 					LogAdvice advice = new LogAdvice(this, attribute);
 
-					if (! this.perTypeLoggingDatas.ContainsKey(methodDef.DeclaringType)) {
-						this.perTypeLoggingDatas.Add(methodDef.DeclaringType, new PerTypeLoggingData());
+					// Join point kinds that are used by respective logging code.
+					JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
+					JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
+					JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
+					// Sum of all required join point kinds;
+					JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
 
-						codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
-						                              JoinPointKinds.BeforeStaticConstructor,
-						                              new Singleton<TypeDefDeclaration>(methodDef.DeclaringType));
+					// Ensure there is at least one join point the logging advice applies to.
+					if (effectiveKinds != 0) {
+						if (! this.perTypeLoggingDatas.ContainsKey(methodDef.DeclaringType)) {
+							this.perTypeLoggingDatas.Add(methodDef.DeclaringType, new PerTypeLoggingData());
+
+							codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+							                              JoinPointKinds.BeforeStaticConstructor,
+							                              new Singleton<TypeDefDeclaration>(methodDef.DeclaringType));
+						}
+
+						codeWeaver.AddMethodLevelAdvice(advice,
+						                                new Singleton<MethodDefDeclaration>(methodDef),
+						                                effectiveKinds,
+						                                null);
 					}
-
-                    // TODO: require join points (JoinPointKinds) smartly for optimal code generation.
-					codeWeaver.AddMethodLevelAdvice(advice,
-					                                new Singleton<MethodDefDeclaration>(methodDef),
-					                                JoinPointKinds.BeforeMethodBody | JoinPointKinds.AfterMethodBodySuccess | JoinPointKinds.AfterMethodBodyException,
-					                                null);
 				}
 			}
 		}
