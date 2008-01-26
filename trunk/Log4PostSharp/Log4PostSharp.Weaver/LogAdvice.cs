@@ -281,6 +281,8 @@ namespace Log4PostSharp.Weaver {
 		#region IAdvice Members
 
 		public int Priority {
+            // TODO: Use another property LogAttribute.AspectPriority
+            // AttributePriority makes sense only during the multicasting process.
 			get { return this.attribute.AttributePriority; }
 		}
 
