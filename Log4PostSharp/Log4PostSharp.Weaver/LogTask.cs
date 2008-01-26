@@ -182,6 +182,7 @@ namespace Log4PostSharp.Weaver {
 						                              new Singleton<TypeDefDeclaration>(methodDef.DeclaringType));
 					}
 
+                    // TODO: require join points (JoinPointKinds) smartly for optimal code generation.
 					codeWeaver.AddMethodLevelAdvice(advice,
 					                                new Singleton<MethodDefDeclaration>(methodDef),
 					                                JoinPointKinds.BeforeMethodBody | JoinPointKinds.AfterMethodBodySuccess | JoinPointKinds.AfterMethodBodyException,
