@@ -73,6 +73,11 @@ namespace Log4PostSharp {
 		/// </summary>
 		private string exceptionText = "Exception thrown from method: {signature}.";
 
+		/// <summary>
+		/// Priority of this aspect.
+		/// </summary>
+		private int aspectPriority = 0;
+
 		#endregion
 
 		#region Public Properties
@@ -179,6 +184,14 @@ namespace Log4PostSharp {
 				
 				this.exceptionText = value;
 			}
+		}
+
+		/// <summary>
+		/// Gets or sets the priority of this aspect.
+		/// </summary>
+		public int AspectPriority {
+			get { return this.aspectPriority; }
+			set { this.aspectPriority = value; }
 		}
 
 		#endregion
