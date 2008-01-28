@@ -244,7 +244,7 @@ namespace Log4PostSharp.Weaver {
 			#region IAdvice Members
 
 			public int Priority {
-				get { return int.MinValue; }
+				get { return int.MaxValue; }
 			}
 
 			public bool RequiresWeave(WeavingContext context) {
@@ -277,7 +277,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
 				// Stack: logger.
 				// Assign logger to the log variable.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, logField);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(logField));
 				// Stack: .
 
 				foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.parent.levelSupportItems) {
@@ -290,11 +290,11 @@ namespace Log4PostSharp.Weaver {
 					perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
 
 					// Check if the logger has debug output enabled.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, logField);
+					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(logField));
 					context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, logLevelSupportItem.IsLoggingEnabledGetter);
 					// Stack: isDebugEnabled.
 					// Assign isDebugEnabled to the appropriate field.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, isLoggingEnabledField);
+					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(isLoggingEnabledField));
 					// Stack: .
 				}
 
