@@ -6,7 +6,6 @@
 Log4PostSharp contains an aspect which uses PostSharp to inject MSIL code that writes messages to log4net log.
 This page describes shortly how to get started using it.
 
-
 = Details =
 
 Code injected by Log4PostSharp can log three kinds of messages:
@@ -14,7 +13,7 @@ Code injected by Log4PostSharp can log three kinds of messages:
   * when a method is exited without throwing exception,
   * when a method throws an exception.
 
-== Per method ==
+== Logging a sinle method ==
 
 The only thing that developer has to do is to decorate a method with `LogAttribute` and provide values for few attribute properties, like in the following example:
 
@@ -27,7 +26,7 @@ int CountCharacters(string arg) {
 
 This would cause that when the method is entered, "Counting characters." message is logged with severity level of `Info`. Also, if exception occurs in the method, it would be logged with level of `Error`.
 
-== Per multiple methods (`Multicast`) ==
+== Logging multiple methods (`Multicast`) ==
 
 In most cases it is desirable to add the following line to project's `AssemblyInfo.cs` file:
 
