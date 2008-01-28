@@ -28,6 +28,7 @@ using System;
 using System.Text;
 
 using PostSharp.CodeModel;
+using PostSharp.CodeModel.Helpers;
 using PostSharp.CodeWeaver;
 using PostSharp.Collections;
 
@@ -111,7 +112,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Check if the logger has debug output enabled.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[entryLevel]);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.IsLoggingEnabledField[entryLevel]));
 				// Stack: isDebugEnabled.
 				// Compare the isDebugEnabled to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -121,7 +122,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call the logging method.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringMethod);
 				// Stack: .
@@ -155,7 +156,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Check if the logger has debug output enabled.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[exitLevel]);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.IsLoggingEnabledField[exitLevel]));
 				// Stack: isDebugEnabled.
 				// Compare the isDebugEnabled to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -165,7 +166,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call the logging method.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringMethod);
 				// Stack: .
@@ -189,6 +190,7 @@ namespace Log4PostSharp.Weaver {
 				TypeDefDeclaration wovenType = context.Method.DeclaringType;
 				PerTypeLoggingData perTypeLoggingData = this.parent.GetPerTypeLoggingData(wovenType);
 
+				context.Method.MethodBody.InitLocalVariables = true;
 				LocalVariableSymbol localVariable = block.DefineLocalVariable(context.Method.Module.FindType(typeof(Exception), BindingOptions.Default), "~ex~{0}");
 
 				InstructionSequence logExceptionSequence = context.Method.MethodBody.CreateInstructionSequence();
@@ -204,7 +206,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Stloc_S, localVariable);
 				// Stack: .
 				// Call log.get_IsDebugEnabled.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.IsLoggingEnabledField[exceptionLevel]);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.IsLoggingEnabledField[exceptionLevel]));
 				// Stack: isDebugEnabled.
 				// Push 0 on the stack and check if isDebugEnabled is equal to 0.
 				context.InstructionWriter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
@@ -214,7 +216,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
 				// Stack: .
 				// Call log.Debug(message, ex).
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, perTypeLoggingData.Log);
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 				context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, message);
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, localVariable);
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, supportItem.LogStringExceptionMethod);
