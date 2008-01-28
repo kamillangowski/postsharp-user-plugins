@@ -25,7 +25,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 using System;
-using System.Globalization;
+using System.Text;
 
 using PostSharp.CodeModel;
 using PostSharp.CodeWeaver;
@@ -53,38 +53,19 @@ namespace Log4PostSharp.Weaver {
 		#region Private Methods
 
 		/// <summary>
-		/// Gets text representing the specified type.
-		/// </summary>
-		/// <param name="type">Type to get text representation for.</param>
-		/// <returns>Text representing the <paramref name="type"/></returns>
-		/// <exception cref="ArgumentNullException"><paramref name="type"/> is <see langword="null"/>.</exception>
-		private static string GetTypeName(ITypeSignature type) {
-			if (type == null) {
-				throw new ArgumentNullException("type");
-			}
-
-			return type.GetSystemType(null, null).Name;
-		}
-
-		/// <summary>
 		/// Gets text containing signature of the specified method.
 		/// </summary>
 		/// <param name="method">Method.</param>
 		/// <returns>Signature of the specified method.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="method"/> is <see langword="null"/>.</exception>
-		private static string GetMethodSignature(MethodDefDeclaration method) {
+		private static string GetMethodSignature(IMethod method) {
 			if (method == null) {
 				throw new ArgumentNullException("method");
 			}
 
-			string returnType = GetTypeName(method.ReturnParameter.ParameterType);
-
-			string[] parameterTypes = new string[method.Parameters.Count];
-			for (int i = 0; i < parameterTypes.Length; i++) {
-				parameterTypes[i] = GetTypeName(method.Parameters[i].ParameterType);
-			}
-
-			return string.Format(CultureInfo.InvariantCulture, "{0} {1}({2})", returnType, method.Name, string.Join(", ", parameterTypes));
+			StringBuilder builder = new StringBuilder();
+			method.WriteReflectionMethodName(builder, ReflectionNameOptions.None);
+			return builder.ToString();
 		}
 
 		/// <summary>
@@ -94,7 +75,7 @@ namespace Log4PostSharp.Weaver {
 		/// <param name="format">Message text containing the placeholders.</param>
 		/// <returns>Message with placeholders expanded.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="method"/> or <paramref name="format"/> is <see langword="null"/>.</exception>
-		private static string GetMessage(MethodDefDeclaration method, string format) {
+		private static string GetMessage(IMethod method, string format) {
 			if (method == null) {
 				throw new ArgumentNullException("method");
 			}
