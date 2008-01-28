@@ -37,4 +37,4 @@ using Log4PostSharp;
 
 [assembly: XmlConfigurator(Watch = true)]
 
-[assembly: Log(AttributeTargetTypes = "*.Program", EntryLevel = LogLevel.Debug, ExitLevel = LogLevel.Debug, ExceptionLevel = LogLevel.Error)]
+[assembly: Log(AttributeTargetTypes = "Log4PostSharp.Test.*", EntryLevel = LogLevel.Debug, ExitLevel = LogLevel.Debug, ExceptionLevel = LogLevel.Error)]

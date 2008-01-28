@@ -23,11 +23,31 @@ namespace Log4PostSharp.Test {
 			MethodWithNoReturnValue(Guid.NewGuid());
 			MethodWithGuidReturnValue();
 			MethodWithIntReturnValue();
+
+			new AnotherSubprogram<int>().Act<string>();
 		}
 
 		public class Subprogram {
 			[Log]
 			public Subprogram() {
+			}
+		}
+
+		public class AnotherSubprogram<T> {
+			static readonly object x = new object();
+
+			public T DoStuff(T t) {
+				return default(T);
+			}
+
+			public U Act<U>() {
+				x.ToString();
+
+				return default(U);
+			}
+
+			public W Act<U, V, W>(U u, V v) {
+				return default(W);
 			}
 		}
 	}
