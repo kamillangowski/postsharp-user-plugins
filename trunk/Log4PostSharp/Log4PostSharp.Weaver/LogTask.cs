@@ -73,6 +73,28 @@ namespace Log4PostSharp.Weaver {
 		#region Private Methods
 
 		/// <summary>
+		/// Creates a private static readonly field.
+		/// </summary>
+		/// <param name="name">Name of the field.</param>
+		/// <param name="type">Type of the field.</param>
+		/// <returns>Private static readonly field of the specified type.</returns>
+		/// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="type"/> is <see langword="null"/>.</exception>
+		private FieldDefDeclaration CreateField(string name, ITypeSignature type) {
+			if (name == null) {
+				throw new ArgumentNullException("name");
+			}
+			if (type == null) {
+				throw new ArgumentNullException("type");
+			}
+
+			FieldDefDeclaration field = new FieldDefDeclaration();
+			field.Attributes = FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static;
+			field.Name = name;
+			field.FieldType = type;
+			return field;
+		}
+
+		/// <summary>
 		/// Creates <see cref="LogLevelSupportItem"/> for the specified logging level.
 		/// </summary>
 		/// <param name="memberNamePart">"Debug", "Info", "Warn", "Error" or "Fatal" depending on the log level the item is to be created for.</param>
@@ -89,9 +111,9 @@ namespace Log4PostSharp.Weaver {
 			string isLoggingEnabledGetterName = string.Format(CultureInfo.InvariantCulture, "Is{0}Enabled", memberNamePart);
 			string logStringMethodName = memberNamePart;
 			string logStringExceptionMethodName = memberNamePart;
-			IMethod isLoggingEnabledGetter = module.FindMethod(typeof(ILog).GetProperty(isLoggingEnabledGetterName).GetGetMethod(), BindingOptions.Default);
-			IMethod logStringMethod = module.FindMethod(typeof(ILog).GetMethod(logStringMethodName, new Type[] { typeof(string) }), BindingOptions.Default);
-			IMethod logStringExceptionMethod = module.FindMethod(typeof(ILog).GetMethod(logStringExceptionMethodName, new Type[] { typeof(string), typeof(Exception) }), BindingOptions.Default);
+			IMethod isLoggingEnabledGetter = module.FindMethod(typeof (ILog).GetProperty(isLoggingEnabledGetterName).GetGetMethod(), BindingOptions.Default);
+			IMethod logStringMethod = module.FindMethod(typeof (ILog).GetMethod(logStringMethodName, new Type[] {typeof (string)}), BindingOptions.Default);
+			IMethod logStringExceptionMethod = module.FindMethod(typeof (ILog).GetMethod(logStringExceptionMethodName, new Type[] {typeof (string), typeof (Exception)}), BindingOptions.Default);
 
 			return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod);
 		}
@@ -186,6 +208,26 @@ namespace Log4PostSharp.Weaver {
 						if (! this.perTypeLoggingDatas.ContainsKey(methodDef.DeclaringType)) {
 							this.perTypeLoggingDatas.Add(methodDef.DeclaringType, new PerTypeLoggingData());
 
+							// Type whose constructor is being woven.
+							TypeDefDeclaration wovenType = methodDef.DeclaringType;
+
+							// Logging data for the woven type.
+							PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
+
+							// Field where ILog instance is stored.
+							FieldDefDeclaration logField = this.CreateField("~log4PostSharp~log", this.ilogType);
+							wovenType.Fields.Add(logField);
+							perTypeLoggingData.Log = logField;
+
+							foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
+								LogLevel logLevel = levelsAndItems.Key;
+
+								string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
+								FieldDefDeclaration isLoggingEnabledField = this.CreateField(isLoggingEnabledFieldName, this.boolType);
+								wovenType.Fields.Add(isLoggingEnabledField);
+								perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
+							}
+
 							codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
 							                              JoinPointKinds.BeforeStaticConstructor,
 							                              new Singleton<TypeDefDeclaration>(methodDef.DeclaringType));
@@ -215,28 +257,6 @@ namespace Log4PostSharp.Weaver {
 			/// </summary>
 			private readonly LogTask parent;
 
-			/// <summary>
-			/// Creates a private static readonly field.
-			/// </summary>
-			/// <param name="name">Name of the field.</param>
-			/// <param name="type">Type of the field.</param>
-			/// <returns>Private static readonly field of the specified type.</returns>
-			/// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="type"/> is <see langword="null"/>.</exception>
-			private FieldDefDeclaration CreateField(string name, ITypeSignature type) {
-				if (name == null) {
-					throw new ArgumentNullException("name");
-				}
-				if (type == null) {
-					throw new ArgumentNullException("type");
-				}
-
-				FieldDefDeclaration field = new FieldDefDeclaration();
-				field.Attributes = FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static;
-				field.Name = name;
-				field.FieldType = type;
-				return field;
-			}
-
 			public LogInitializeAdvice(LogTask parent) {
 				this.parent = parent;
 			}
@@ -244,7 +264,7 @@ namespace Log4PostSharp.Weaver {
 			#region IAdvice Members
 
 			public int Priority {
-				get { return int.MaxValue; }
+				get { return int.MinValue; }
 			}
 
 			public bool RequiresWeave(WeavingContext context) {
@@ -258,11 +278,6 @@ namespace Log4PostSharp.Weaver {
 				// Logging data for the woven type.
 				PerTypeLoggingData perTypeLoggingData = this.parent.perTypeLoggingDatas[wovenType];
 
-				// Field where ILog instance is stored.
-				FieldDefDeclaration logField = this.CreateField("~log4PostSharp~log", this.parent.ilogType);
-				wovenType.Fields.Add(logField);
-				perTypeLoggingData.Log = logField;
-
 				InstructionSequence initializeSequence = context.Method.MethodBody.CreateInstructionSequence();
 
 				block.AddInstructionSequence(initializeSequence, NodePosition.Before, null);
@@ -271,30 +286,25 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Get the declaring type of the constructor.
-				context.WeavingHelper.GetRuntimeType(context.Method.DeclaringType, context.InstructionWriter);
+				context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(context.Method.DeclaringType), context.InstructionWriter);
 				// Stack: type.
 				// Get the logger for the method_declaring_type.
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
 				// Stack: logger.
 				// Assign logger to the log variable.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(logField));
+				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 				// Stack: .
 
 				foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.parent.levelSupportItems) {
 					LogLevel logLevel = levelsAndItems.Key;
 					LogLevelSupportItem logLevelSupportItem = levelsAndItems.Value;
 
-					string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
-					FieldDefDeclaration isLoggingEnabledField = this.CreateField(isLoggingEnabledFieldName, this.parent.boolType);
-					wovenType.Fields.Add(isLoggingEnabledField);
-					perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
-
 					// Check if the logger has debug output enabled.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(logField));
+					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 					context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, logLevelSupportItem.IsLoggingEnabledGetter);
 					// Stack: isDebugEnabled.
 					// Assign isDebugEnabled to the appropriate field.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(isLoggingEnabledField));
+					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.IsLoggingEnabledField[logLevel]));
 					// Stack: .
 				}
 
