@@ -50,5 +50,9 @@ namespace Log4PostSharp.Test {
 				return default(W);
 			}
 		}
+
+		public interface ITest {
+			void DoTest();
+		}
 	}
 }
