@@ -190,53 +190,56 @@ namespace Log4PostSharp.Weaver {
 				// Gets the method to which it applies. 
 				MethodDefDeclaration methodDef = customAttributeEnumerator.Current.TargetElement as MethodDefDeclaration;
 				if (methodDef != null) {
-					// Constructs a custom attribute instance. 
-					LogAttribute attribute = (LogAttribute) CustomAttributeHelper.ConstructRuntimeObject(customAttributeEnumerator.Current.Value, this.Project.Module);
+					// Type whose constructor is being woven.
+					TypeDefDeclaration wovenType = methodDef.DeclaringType;
 
-					// Build an advice based on this custom attribute. 
-					LogAdvice advice = new LogAdvice(this, attribute);
+					// Do not weave interface.
+					if ((wovenType.Attributes & TypeAttributes.Interface) != TypeAttributes.Interface) {
+						// Constructs a custom attribute instance. 
+						LogAttribute attribute = (LogAttribute) CustomAttributeHelper.ConstructRuntimeObject(customAttributeEnumerator.Current.Value, this.Project.Module);
 
-					// Join point kinds that are used by respective logging code.
-					JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
-					JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
-					JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
-					// Sum of all required join point kinds;
-					JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
+						// Build an advice based on this custom attribute. 
+						LogAdvice advice = new LogAdvice(this, attribute);
 
-					// Ensure there is at least one join point the logging advice applies to.
-					if (effectiveKinds != 0) {
-						if (! this.perTypeLoggingDatas.ContainsKey(methodDef.DeclaringType)) {
-							this.perTypeLoggingDatas.Add(methodDef.DeclaringType, new PerTypeLoggingData());
+						// Join point kinds that are used by respective logging code.
+						JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
+						JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
+						JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
+						// Sum of all required join point kinds;
+						JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
 
-							// Type whose constructor is being woven.
-							TypeDefDeclaration wovenType = methodDef.DeclaringType;
+						// Ensure there is at least one join point the logging advice applies to.
+						if (effectiveKinds != 0) {
+							if (!this.perTypeLoggingDatas.ContainsKey(wovenType)) {
+								this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
 
-							// Logging data for the woven type.
-							PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
+								// Logging data for the woven type.
+								PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
 
-							// Field where ILog instance is stored.
-							FieldDefDeclaration logField = this.CreateField("~log4PostSharp~log", this.ilogType);
-							wovenType.Fields.Add(logField);
-							perTypeLoggingData.Log = logField;
+								// Field where ILog instance is stored.
+								FieldDefDeclaration logField = this.CreateField("~log4PostSharp~log", this.ilogType);
+								wovenType.Fields.Add(logField);
+								perTypeLoggingData.Log = logField;
 
-							foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
-								LogLevel logLevel = levelsAndItems.Key;
+								foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
+									LogLevel logLevel = levelsAndItems.Key;
 
-								string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
-								FieldDefDeclaration isLoggingEnabledField = this.CreateField(isLoggingEnabledFieldName, this.boolType);
-								wovenType.Fields.Add(isLoggingEnabledField);
-								perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
+									string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
+									FieldDefDeclaration isLoggingEnabledField = this.CreateField(isLoggingEnabledFieldName, this.boolType);
+									wovenType.Fields.Add(isLoggingEnabledField);
+									perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
+								}
+
+								codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+								                              JoinPointKinds.BeforeStaticConstructor,
+															  new Singleton<TypeDefDeclaration>(wovenType));
 							}
 
-							codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
-							                              JoinPointKinds.BeforeStaticConstructor,
-							                              new Singleton<TypeDefDeclaration>(methodDef.DeclaringType));
+							codeWeaver.AddMethodLevelAdvice(advice,
+							                                new Singleton<MethodDefDeclaration>(methodDef),
+							                                effectiveKinds,
+							                                null);
 						}
-
-						codeWeaver.AddMethodLevelAdvice(advice,
-						                                new Singleton<MethodDefDeclaration>(methodDef),
-						                                effectiveKinds,
-						                                null);
 					}
 				}
 			}
@@ -286,7 +289,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
 				// Get the declaring type of the constructor.
-				context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(context.Method.DeclaringType), context.InstructionWriter);
+				context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(wovenType), context.InstructionWriter);
 				// Stack: type.
 				// Get the logger for the method_declaring_type.
 				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
