@@ -1,3 +1,4 @@
+#labels Featured
 PostSharp4Unity modifies assemblies after compilation to make objects self-configurable: you don't need to call a factory method; you can use the default constructor. All you have to do is to decorate your class with the custom attribute "Configurable". It smells 
 like Spring, isn't it ;-).
 
