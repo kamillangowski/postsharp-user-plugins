@@ -44,7 +44,6 @@ Additionally, you have to add the <postsharp ... /> section in the configuration
 		<trace enabled="true" pageOutput="true"/>
 	</system.web>
 </configuration>
- 
-In all configuration parameters and in search path elements, the tilde character (~) is replaced by the physical path of the application. 
-
 }}}
+
+In all configuration parameters and in search path elements, the tilde character (~) is replaced by the physical path of the application. 
