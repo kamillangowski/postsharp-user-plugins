@@ -1,25 +1,75 @@
 using System;
-using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Web;
 using System.Web.Compilation;
 using System.Web.Configuration;
 using PostSharp.AspNet.Configuration;
 
 namespace PostSharp.AspNet
 {
+    /// <summary>
+    /// Hooks into the ASP.NET compilation process by post-processing
+    /// assemblies using PostSharp (implementation of <see cref="IAssemblyPostProcessor"/>).
+    /// </summary>
+    /// <remarks>
+    /// <para>In order to use PostSharp in a web project, specify this class
+    /// as an assembly post-processor in <b>web.config</b>:</para>
+    /// <code>
+    /// &lt;configuration&gt;
+    ///      &lt;system.web&gt;
+    ///        &lt;compilation debug="true" assemblyPostProcessorType="PostSharp.AspNet.AssemblyPostProcessor, PostSharp.AspNet"/&gt;
+    ///      &lt;/system.web&gt;
+    /// &lt;/configuration&gt;
+    /// </code>
+    /// <para>Additionally, you have to add the <b>&lt;postsharp ... /&gt;</b>
+    /// section in the configuration file:
+    /// </para>
+    /// <code>
+    ///&lt;?xml version="1.0"?&gt;
+    ///&lt;configuration&gt;
+    ///	&lt;!-- Add a configuration handler for PostSharp. --&gt;
+    ///	&lt;configSections&gt;
+    ///		&lt;section name="postsharp" type="PostSharp.AspNet.Configuration.PostSharpConfiguration, PostSharp.AspNet"/&gt;
+    ///	&lt;/configSections&gt;
+    ///	&lt;!-- PostSharp configuration --&gt;
+    ///	&lt;postsharp directory="P:\open\branches\1.0\Core\PostSharp.MSBuild\bin\Debug" trace="true"&gt;
+    ///		&lt;parameters&gt;
+    ///			&lt;!--&lt;add name="parameter-name" value="parameter-value"/&gt;--&gt;
+    ///		&lt;/parameters&gt;
+    ///		&lt;searchPath&gt;
+    ///			&lt;!-- Always add the binary folder to the search path. --&gt;
+    ///			&lt;add name="bin" value="~\bin"/&gt;
+    ///			&lt;!-- Then add the location of plug-ins that are not installed in standard locations. --&gt;
+    ///			&lt;add name="laos-weaver" value="P:\open\branches\1.0\Laos\PostSharp.Laos.Weaver\bin\Debug"/&gt;
+    ///		&lt;/searchPath&gt;
+    ///	&lt;/postsharp&gt;
+    ///	&lt;appSettings/&gt;
+    ///	&lt;connectionStrings/&gt;
+    ///	&lt;system.web&gt;
+    ///		&lt;!-- Note the 'assemblyPostProcessorType' attribute. --&gt;
+    ///		&lt;compilation debug="true" assemblyPostProcessorType="PostSharp.AspNet.AssemblyPostProcessor, PostSharp.AspNet"&gt;
+    ///		&lt;authentication mode="None"/&gt;
+    ///		&lt;trace enabled="true" pageOutput="true"/&gt;
+    ///	&lt;/system.web&gt;
+    ///&lt;/configuration&gt;
+    /// </code>
+    /// <para>
+    /// In all configuration parameters and in search path elements, the tilde character (~) is
+    /// replaced by the physical path of the application.
+    /// </para>
+    /// </remarks>
+    /// <seealso cref="PostSharpConfiguration"/>
     public class AssemblyPostProcessor : IAssemblyPostProcessor
     {
         private readonly PostSharpConfiguration configuration;
         private readonly string project;
-        private string applicationPath;
+        private readonly string applicationPath;
 
         public AssemblyPostProcessor()
         {
-            this.configuration =  WebConfigurationManager.GetSection("postsharp") as PostSharpConfiguration;
+            this.configuration = WebConfigurationManager.GetSection("postsharp") as PostSharpConfiguration;
             if (this.configuration == null)
                 throw new ConfigurationErrorsException("Cannot get the 'postsharp' section from configuration.");
 
@@ -34,7 +84,7 @@ namespace PostSharp.AspNet
         public void PostProcessAssembly(string path)
         {
             string commandLine = Path.Combine(this.configuration.Directory, "postsharp.exe");
-            if ( !File.Exists(commandLine))
+            if (!File.Exists(commandLine))
             {
                 throw new ConfigurationErrorsException(
                     string.Format("Cannot find the file: '{0}'.", commandLine));
@@ -48,7 +98,7 @@ namespace PostSharp.AspNet
             File.Copy(path, shadowAssembly, true);
             string pdbFile = Path.ChangeExtension(path, ".pdb");
             string shadowPdb = Path.Combine(shadowDirectory, Path.GetFileName(pdbFile));
-            if ( File.Exists(pdbFile))
+            if (File.Exists(pdbFile))
                 File.Copy(pdbFile, shadowPdb, true);
             string intermediateDirectory = Path.Combine(Path.GetDirectoryName(path), "postsharp");
             if (!Directory.Exists(intermediateDirectory))
@@ -68,10 +118,10 @@ namespace PostSharp.AspNet
             process.StartInfo.RedirectStandardOutput = true;
 
 
-          
             StringBuilder arguments = new StringBuilder();
-            arguments.AppendFormat("\"/P:Output={0}\" \"/P:IntermediateDirectory={1} \"  /P:CleanIntermediate=False /P:ReferenceDirectory=. \"/P:SearchPath=",
-                                   outputAssembly, intermediateDirectory);
+            arguments.AppendFormat(
+                "\"/P:Output={0}\" \"/P:IntermediateDirectory={1} \"  /P:CleanIntermediate=False /P:ReferenceDirectory=. /P:SignAssembly=False /P:PrivateKeyLocation= \"/P:SearchPath=",
+                outputAssembly, intermediateDirectory);
 
             foreach (NameValueConfigurationElement searchPath in this.configuration.SearchPath)
             {
@@ -90,7 +140,7 @@ namespace PostSharp.AspNet
                 arguments.Append("\" ");
             }
 
-            if ( this.configuration.AttachDebugger )
+            if (this.configuration.AttachDebugger)
             {
                 arguments.Append("/Attach ");
             }
@@ -107,8 +157,8 @@ namespace PostSharp.AspNet
             string logMessage;
             if (this.configuration.Trace)
             {
-                string logFile = Path.Combine(Path.GetTempPath(), 
-                    string.Format("postsharp-aspnet-{0:yyyy-MM-dd}.log", DateTime.Now));
+                string logFile = Path.Combine(Path.GetTempPath(),
+                                              string.Format("postsharp-aspnet-{0:yyyy-MM-dd}.log", DateTime.Now));
                 logMessage = string.Format(" See file '{0}' for details.", logFile);
                 logWriter = new LogWriter(logFile);
                 logWriter.Writer.WriteLine(process.StartInfo.FileName + " " + process.StartInfo.Arguments);
@@ -121,7 +171,7 @@ namespace PostSharp.AspNet
                 logMessage = "";
             }
 
-          
+
             process.Start();
 
             process.BeginErrorReadLine();
@@ -129,45 +179,41 @@ namespace PostSharp.AspNet
 
             bool success = process.WaitForExit(60000);
 
-            if ( logWriter != null )
+            if (logWriter != null)
                 logWriter.Dispose();
 
-            if ( !success )
+            if (!success)
                 throw new ApplicationException("PostSharp did not finish in due time." + logMessage);
 
-            if ( process.ExitCode != 0 )
+            if (process.ExitCode != 0)
                 throw new ApplicationException("PostSharp did not complete successfully." + logMessage);
 
             File.Copy(outputAssembly, path, true);
-            if ( File.Exists(outputPdb))
+            if (File.Exists(outputPdb))
                 File.Copy(outputPdb, pdbFile, true);
-
-            
         }
 
         public void Dispose()
         {
-            
         }
-        
-        class LogWriter : IDisposable
+
+        private class LogWriter : IDisposable
         {
             private StreamWriter writer;
 
-            public LogWriter( string fileName )
+            public LogWriter(string fileName)
             {
                 this.writer = new StreamWriter(fileName, true, Encoding.UTF8);
             }
 
-            public StreamWriter Writer { get { return this.writer;  } }
+            public StreamWriter Writer
+            {
+                get { return this.writer; }
+            }
 
 
             public void OnPostSharpDataReceived(object sender, DataReceivedEventArgs e)
             {
-                if ( HttpContext.Current != null )
-                {
-                     HttpContext.Current.Trace.Write("PostSharp", e.Data);
-                }
                 if (writer != null)
                 {
                     writer.WriteLine(e.Data);
