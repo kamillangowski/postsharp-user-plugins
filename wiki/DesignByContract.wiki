@@ -31,7 +31,7 @@ Current features:
   }
 
 === Using the class ===
-  Just like any other class, if you are compiling against the plain class (not yet postsharpen)
+  Just like any other class, if you are compiling against the plain class (not yet enhaced)
 
   MySingletonCandidate obj1 = new MySingletonCandidate();
 
@@ -39,7 +39,7 @@ Current features:
 
   MySingletonCandidate obj1 = MySingletonCandidate.Instance;
 
-  If you are compiling against the postsharpen class.
+  If you are compiling against the enhaced class.
 
 Comments to altobarba [at] gmail [dot] com, or posting in the postsharp's [http://www.postsharp.org/forum/ forum].
 
