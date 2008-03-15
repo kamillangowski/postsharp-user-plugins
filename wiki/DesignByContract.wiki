@@ -1,0 +1,46 @@
+DesignByContract lets you specify constraint and checks to your code.
+
+= Introduction =
+You can find an introduction to design by contract [http://en.wikipedia.org/wiki/Design_by_contract here].
+
+= Details =
+
+Current features:
+  * Check for null parameters and return values
+  * Check for empty string parameters and return values
+  * Define singletons classes
+
+= Usage =
+== NonNull/NonEmpty ==
+  [return: NonNull] public SomeObject SomeMethod([NonNull] AnotherObject param1)
+  {
+    ...
+  }
+
+== Singleton ==
+=== Declaration ===
+  [Singleton]
+  public class MySingletonCandidate
+  {
+     // default constructor
+     public MySingletonCandidate()
+     {
+        ...
+     }
+     ...
+  }
+
+=== Using the class ===
+  Just like any other class, if you are compiling against the plain class (not yet postsharpen)
+
+  MySingletonCandidate obj1 = new MySingletonCandidate();
+
+  Or
+
+  MySingletonCandidate obj1 = MySingletonCandidate.Instance;
+
+  If you are compiling against the postsharpen class.
+
+Comments to altobarba [at] gmail [dot] com, or posting in the postsharp's [http://www.postsharp.org/forum/ forum].
+
+Ignacio Vivona.
