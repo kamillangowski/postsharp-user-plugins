@@ -46,6 +46,6 @@ Download source code from [http://postsharp-user-plugins.googlecode.com/svn/trun
 }}}
   If you are compiling against the enhaced class.
 
-Comments to altobarba [at] gmail [dot] com, or posting in the postsharp's [http://www.postsharp.org/forum/ forum].
+Comments to altobarba [at] gmail [dot] com, or posting in the postsharp's [http://www.postsharp.org/forum/designbycontract-f17.html forum].
 
 Ignacio Vivona.
