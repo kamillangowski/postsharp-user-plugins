@@ -34,10 +34,7 @@ namespace Torch.DesignByContract.Weaving.Advices
             sequence = context.Method.MethodBody.CreateInstructionSequence();
             block.AddInstructionSequence(sequence, NodePosition.After, null);
             context.InstructionWriter.AttachInstructionSequence(sequence);
-            // TODO: sacar esto
-            context.WeavingHelper.WriteLine("aca {0}", context.InstructionWriter, context.InstructionReader.CurrentInstruction);
-            context.WeavingHelper.WriteLine("aca {0}", context.InstructionWriter, m_type);
-
+            
             context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, context.Method.Module.FindMethod(m_type.Methods.GetOneByName("get_Instance").GetReflectionWrapper(new Type[]{},new Type[]{}),BindingOptions.Default));
             context.InstructionWriter.DetachInstructionSequence();
             
