@@ -1,3 +1,4 @@
+#labels Featured,Phase-Requirements,Phase-Design
 DesignByContract lets you specify constraint and checks to your code.
 
 = Introduction =
@@ -12,13 +13,16 @@ Current features:
 
 = Usage =
 == NonNull/NonEmpty ==
+{{{
   [return: NonNull] public SomeObject SomeMethod([NonNull] AnotherObject param1)
   {
     ...
   }
+}}}
 
 == Singleton ==
 === Declaration ===
+{{{
   [Singleton]
   public class MySingletonCandidate
   {
@@ -29,16 +33,16 @@ Current features:
      }
      ...
   }
-
+}}}
 === Using the class ===
   Just like any other class, if you are compiling against the plain class (not yet enhaced)
-
+{{{
   MySingletonCandidate obj1 = new MySingletonCandidate();
-
+}}}
   Or
-
+{{{
   MySingletonCandidate obj1 = MySingletonCandidate.Instance;
-
+}}}
   If you are compiling against the enhaced class.
 
 Comments to altobarba [at] gmail [dot] com, or posting in the postsharp's [http://www.postsharp.org/forum/ forum].
