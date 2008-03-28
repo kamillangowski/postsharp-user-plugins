@@ -49,6 +49,16 @@ namespace Log4PostSharp.Weaver {
 		private ITypeSignature boolType;
 
 		/// <summary>
+		/// System.Object type.
+		/// </summary>
+		private ITypeSignature objectType;
+
+		/// <summary>
+		/// System.Globalization.CultureInfo.InvariantCulture getter.
+		/// </summary>
+		private IMethod invariantCultureGetter;
+
+		/// <summary>
 		/// log4net.LogManager.GetLogger(System.Type) method.
 		/// </summary>
 		private IMethod getLoggerMethod;
@@ -79,7 +89,7 @@ namespace Log4PostSharp.Weaver {
 		/// <param name="type">Type of the field.</param>
 		/// <returns>Private static readonly field of the specified type.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="type"/> is <see langword="null"/>.</exception>
-		private FieldDefDeclaration CreateField(string name, ITypeSignature type) {
+		private static FieldDefDeclaration CreateField(string name, ITypeSignature type) {
 			if (name == null) {
 				throw new ArgumentNullException("name");
 			}
@@ -111,11 +121,13 @@ namespace Log4PostSharp.Weaver {
 			string isLoggingEnabledGetterName = string.Format(CultureInfo.InvariantCulture, "Is{0}Enabled", memberNamePart);
 			string logStringMethodName = memberNamePart;
 			string logStringExceptionMethodName = memberNamePart;
+			string logCultureStringArgsMethodName = memberNamePart + "Format";
 			IMethod isLoggingEnabledGetter = module.FindMethod(typeof (ILog).GetProperty(isLoggingEnabledGetterName).GetGetMethod(), BindingOptions.Default);
 			IMethod logStringMethod = module.FindMethod(typeof (ILog).GetMethod(logStringMethodName, new Type[] {typeof (string)}), BindingOptions.Default);
 			IMethod logStringExceptionMethod = module.FindMethod(typeof (ILog).GetMethod(logStringExceptionMethodName, new Type[] {typeof (string), typeof (Exception)}), BindingOptions.Default);
+			IMethod logCultureStringArgsMethod = module.FindMethod(typeof (ILog).GetMethod(logCultureStringArgsMethodName, new Type[] {typeof (IFormatProvider), typeof (string), typeof (object[])}), BindingOptions.Default);
 
-			return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod);
+			return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod, logCultureStringArgsMethod);
 		}
 
 		#endregion
@@ -123,16 +135,30 @@ namespace Log4PostSharp.Weaver {
 		#region Internal Properties
 
 		/// <summary>
+		/// Gets the System.Object type.
+		/// </summary>
+		internal ITypeSignature ObjectType {
+			get { return this.objectType; }
+		}
+
+		/// <summary>
+		/// Gets the System.Globalization.CultureInfo.InvariantCulture getter.
+		/// </summary>
+		internal IMethod InvariantCultureGetter {
+			get { return this.invariantCultureGetter; }
+		}
+
+		/// <summary>
 		/// Gets the log4net.LogManager.GetLogger(System.Type) method.
 		/// </summary>
-		public IMethod GetLoggerMethod {
+		internal IMethod GetLoggerMethod {
 			get { return this.getLoggerMethod; }
 		}
 
 		/// <summary>
 		/// Gets the log4net.ILog type.
 		/// </summary>
-		public ITypeSignature IlogType {
+		internal ITypeSignature IlogType {
 			get { return this.ilogType; }
 		}
 
@@ -163,6 +189,8 @@ namespace Log4PostSharp.Weaver {
 
 			// Prepare types and methods. They will be used later by advices.
 			this.boolType = module.FindType(typeof (bool), BindingOptions.Default);
+			this.objectType = module.FindType(typeof (object), BindingOptions.Default);
+			this.invariantCultureGetter = module.FindMethod(typeof (CultureInfo).GetProperty("InvariantCulture").GetGetMethod(), BindingOptions.Default);
 			this.getLoggerMethod = module.FindMethod(typeof (LogManager).GetMethod("GetLogger", new Type[] {typeof (Type)}), BindingOptions.Default);
 			this.ilogType = module.FindType(typeof (ILog), BindingOptions.Default);
 
@@ -217,7 +245,7 @@ namespace Log4PostSharp.Weaver {
 								PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
 
 								// Field where ILog instance is stored.
-								FieldDefDeclaration logField = this.CreateField("~log4PostSharp~log", this.ilogType);
+								FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
 								wovenType.Fields.Add(logField);
 								perTypeLoggingData.Log = logField;
 
@@ -225,14 +253,14 @@ namespace Log4PostSharp.Weaver {
 									LogLevel logLevel = levelsAndItems.Key;
 
 									string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
-									FieldDefDeclaration isLoggingEnabledField = this.CreateField(isLoggingEnabledFieldName, this.boolType);
+									FieldDefDeclaration isLoggingEnabledField = CreateField(isLoggingEnabledFieldName, this.boolType);
 									wovenType.Fields.Add(isLoggingEnabledField);
 									perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
 								}
 
 								codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
 								                              JoinPointKinds.BeforeStaticConstructor,
-															  new Singleton<TypeDefDeclaration>(wovenType));
+								                              new Singleton<TypeDefDeclaration>(wovenType));
 							}
 
 							codeWeaver.AddMethodLevelAdvice(advice,

@@ -1,11 +1,19 @@
 using System;
+using System.Globalization;
 
 namespace Log4PostSharp.Test {
 	public class Program {
 		public static void MethodWithNoReturnValue() {
 		}
 
+		[Log(EntryLevel = LogLevel.Fatal, EntryText = "Calling {@someId}.")]
 		public static void MethodWithNoReturnValue(Guid someId) {
+		}
+
+		[Log(EntryLevel = LogLevel.Debug, EntryText = "Test for '{@a1}', '{@a2}', '{@a3}'.")]
+		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Was called with params: {paramlist}.")]
+		public static int MultipleArgsMethod(int a1, string a2, object a3) {
+			return a1 + 50;
 		}
 
 		[Log(LogLevel.Info, "Test message.")]
@@ -19,8 +27,11 @@ namespace Log4PostSharp.Test {
 		}
 
 		public static void Main(string[] args) {
+			string.Format(CultureInfo.InvariantCulture, "{0}{1}", args, 5);
+
 			MethodWithNoReturnValue();
 			MethodWithNoReturnValue(Guid.NewGuid());
+			MultipleArgsMethod(1, "A", null);
 			MethodWithGuidReturnValue();
 			MethodWithIntReturnValue();
 
