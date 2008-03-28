@@ -61,7 +61,7 @@ namespace Log4PostSharp.Weaver {
 		/// <summary>
 		/// Placeholder that indicates comma-separated list of values of all method parameters.
 		/// </summary>
-		private static readonly string shortParameterList = "paramlist";
+		private static readonly string shortParameterList = "paramvalues";
 
 		/// <summary>
 		/// Prefix that indicates method parameter token.
