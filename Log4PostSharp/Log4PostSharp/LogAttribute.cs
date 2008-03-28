@@ -32,6 +32,41 @@ namespace Log4PostSharp {
 	/// <summary>
 	/// Indicates that each time a method is entered or left this fact will be written in the log.
 	/// </summary>
+	/// <remarks>
+	/// <para>Logging can occur at any of the three stages of the method execution:
+	/// <list type="bullet">
+	/// <item>Before the control flow enters the method,</item>
+	/// <item>After the control flow exits the method after the method code is successfully executed,</item>
+	/// <item>After the control flow exits the method because its execution is interrupted by an uncaught exception.</item>
+	/// </list>
+	/// Attribute defines properties for adjusting logging behavior (message severity and message text) for all these cases. 
+	/// Setting message severity (log level) to <see cref="LogLevel.None"/> effectively disables logging for the specified case (i.e.
+	/// respective logging code is not injected).</para>
+	/// <para>Logging message can contain placeholders which are expanded to actual values before the message 
+	/// is logged. Some of these values are already known during weaving, but others may vary between
+	/// calls to the method and therefore can be determined only at run-time. Using the former ones
+	/// has no impact on the performance of the injected code (i.e. performance is exactly same as if
+	/// no placeholders were used), the latter, however, requires the Log4PostSharp to inject different,
+	/// slower code.</para>
+	/// <para>Following table lists the placeholders which are expanded when the method is woven:</para>
+	/// <list type="table">
+	/// <listheader><term>Placeholder</term><description>Action</description></listheader>
+	/// <item><term>{signature}</term><description>Expanded to method signature (not including namespaces of parameter types or return value type).</description></item>
+	/// </list>
+	/// <para>Following table lists the placeholders which are expanded at run-time and therefore their appearance
+	/// causes the Log4PostSharp to inject slower code:</para>
+	/// <list type="table">
+	/// <listheader><term>Placeholder</term><description>Action</description></listheader>
+	/// <item><term>{@<i>parameter_name</i>}</term><description>Expanded to the value of the specified parameter of the method.</description></item>
+	/// <item><term>{paramlist}</term><description>Expanded to the comma-separated list of values of all parameters of the method. Value of every parameter is surrounded by quote-signs.</description></item>
+	/// </list>
+	/// <para>Performance-wise, it does not make much of difference how many occurences of the "heavy" placeholders appear in a single
+	/// message. What matters is that these are used at all. Also, messages for the same method are treated
+	/// separately - using the "heavy" placeholders for the method entry message has no impact on the performance of
+	/// the code injected for the exit or exception messages.</para>
+	/// <para>Because of some log4net API limitations, the "heavy" placeholders cannot be used in the <see cref="ExceptionText"/>.
+	/// Code will fail to weave if this rule is broken.</para>
+	/// </remarks>
 	[AttributeUsage(
 		AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Module | AttributeTargets.Struct, 
 		AllowMultiple = true, 
@@ -99,11 +134,7 @@ namespace Log4PostSharp {
 		/// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
 		/// <remarks>
 		/// <para>Default value of this proprerty is the following string: "Entering method: {signature}.".</para>
-		/// <para>Following placeholders are supported and will be expanded during weaving:</para>
-		/// <list type="table">
-		/// <listheader><term>Placeholder</term><description>Action</description></listheader>
-		/// <item><term>{signature}</term><description>Expanded to method signature (not including namespaces of parameter types or return value type).</description></item>
-		/// </list>
+		/// <para>Please refer to the class documentation for more information.</para>
 		/// </remarks>
 		public string EntryText {
 			get { return this.entryText; }
@@ -133,11 +164,7 @@ namespace Log4PostSharp {
 		/// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
 		/// <remarks>
 		/// <para>Default value of this proprerty is the following string: "Exiting method: {signature}.".</para>
-		/// <para>Following placeholders are supported and will be expanded during weaving:</para>
-		/// <list type="table">
-		/// <listheader><term>Placeholder</term><description>Action</description></listheader>
-		/// <item><term>{signature}</term><description>Expanded to method signature (not including namespaces of parameter types or return value type).</description></item>
-		/// </list>
+		/// <para>Please refer to the class documentation for more information.</para>
 		/// </remarks>
 		public string ExitText {
 			get { return this.exitText; }
@@ -167,13 +194,7 @@ namespace Log4PostSharp {
 		/// <exception cref="ArgumentNullException"><paramref name="value"/> is <see langword="null"/>.</exception>
 		/// <remarks>
 		/// <para>Default value of this proprerty is the following string: "Exception thrown from method: {signature}.".</para>
-		/// <para>Full contents of the exception are written to the log regardless of the value of this
-		/// property (provided only that <see cref="ExceptionLevel"/> is other than <see cref="LogLevel.None"/>).</para>
-		/// <para>Following placeholders are supported and will be expanded during weaving:</para>
-		/// <list type="table">
-		/// <listheader><term>Placeholder</term><description>Action</description></listheader>
-		/// <item><term>{signature}</term><description>Expanded to method signature (not including namespaces of parameter types or return value type).</description></item>
-		/// </list>
+		/// <para>Please refer to the class documentation for more information.</para>
 		/// </remarks>
 		public string ExceptionText {
 			get { return this.exceptionText; }
@@ -213,6 +234,7 @@ namespace Log4PostSharp {
 		/// <exception cref="ArgumentNullException"><paramref name="entryText"/> is <see langword="null"/>.</exception>
 		/// <remarks>
 		/// <para>This constructor also sets <see cref="ExceptionLevel"/> to <see cref="LogLevel.Error"/>.</para>
+		/// <para>Please refer to the class documentation for more information.</para>
 		/// </remarks>
 		public LogAttribute(LogLevel entryLevel, string entryText) {
 			if (entryText == null) {

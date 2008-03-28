@@ -49,6 +49,11 @@ namespace Log4PostSharp.Weaver {
 		private readonly IMethod logStringExceptionMethod;
 
 		/// <summary>
+		/// log4net.ILog.XXX(CultureInfo, string, object[]) method.
+		/// </summary>
+		private readonly IMethod logCultureStringArgsMethod;
+
+		/// <summary>
 		/// Gets the log4net.ILog.IsXXXEnabled property getter.
 		/// </summary>
 		public IMethod IsLoggingEnabledGetter {
@@ -70,13 +75,21 @@ namespace Log4PostSharp.Weaver {
 		}
 
 		/// <summary>
+		/// Gets the log4net.ILog.XXX(CultureInfo, string, object[]) method.
+		/// </summary>
+		public IMethod LogCultureStringArgsMethod {
+			get { return this.logCultureStringArgsMethod; }
+		}
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="LogLevelSupportItem"/> class with the specified methods.
 		/// </summary>
 		/// <param name="isLoggingEnabledGetter">Getter of log4net.ILog.IsXXXEnabled property.</param>
 		/// <param name="logStringMethod">log4net.ILog.XXX(string) method.</param>
 		/// <param name="logStringExceptionMethod">log4net.ILog.XXX(string, Exception) method.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="isLoggingEnabledGetter"/>, <paramref name="logStringMethod"/> or <paramref name="logStringExceptionMethod"/> is <see langword="null"/>.</exception>
-		public LogLevelSupportItem(IMethod isLoggingEnabledGetter, IMethod logStringMethod, IMethod logStringExceptionMethod) {
+		/// <param name="logCultureStringArgsMethod">log4net.ILog.XXX(CultureInfo, string, object[]) method.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="isLoggingEnabledGetter"/>, <paramref name="logStringMethod"/>, <paramref name="logStringExceptionMethod"/> or <paramref name="logCultureStringArgsMethod"/> is <see langword="null"/>.</exception>
+		public LogLevelSupportItem(IMethod isLoggingEnabledGetter, IMethod logStringMethod, IMethod logStringExceptionMethod, IMethod logCultureStringArgsMethod) {
 			if (isLoggingEnabledGetter == null) {
 				throw new ArgumentNullException("isLoggingEnabledGetter");
 			}
@@ -86,8 +99,12 @@ namespace Log4PostSharp.Weaver {
 			if (logStringExceptionMethod == null) {
 				throw new ArgumentNullException("logStringExceptionMethod");
 			}
+			if (logCultureStringArgsMethod == null) {
+				throw new ArgumentNullException("logCultureStringArgsMethod");
+			}
 
 			this.isLoggingEnabledGetter = isLoggingEnabledGetter;
+			this.logCultureStringArgsMethod = logCultureStringArgsMethod;
 			this.logStringMethod = logStringMethod;
 			this.logStringExceptionMethod = logStringExceptionMethod;
 		}
