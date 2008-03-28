@@ -11,7 +11,7 @@ namespace Log4PostSharp.Test {
 		}
 
 		[Log(EntryLevel = LogLevel.Debug, EntryText = "Test for '{@a1}', '{@a2}', '{@a3}'.")]
-		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Was called with params: {paramlist}.")]
+		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Was called with params: {paramvalues}.")]
 		public static int MultipleArgsMethod(int a1, string a2, object a3) {
 			return a1 + 50;
 		}
