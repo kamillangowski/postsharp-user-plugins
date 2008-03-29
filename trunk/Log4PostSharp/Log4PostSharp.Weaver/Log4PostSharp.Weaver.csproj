@@ -52,6 +52,7 @@
     <Compile Include="ParameterValueToken.cs" />
     <Compile Include="PerTypeLoggingData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReturnValueToken.cs" />
     <Compile Include="TemplateParser.cs" />
   </ItemGroup>
   <ItemGroup>
