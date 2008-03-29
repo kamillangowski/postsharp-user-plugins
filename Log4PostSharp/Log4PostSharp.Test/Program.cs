@@ -7,13 +7,17 @@ namespace Log4PostSharp.Test {
 		}
 
 		[Log(EntryLevel = LogLevel.Fatal, EntryText = "Calling {@someId}.")]
+		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Return value is: '{returnvalue}'.")]
 		public static void MethodWithNoReturnValue(Guid someId) {
 		}
 
-		[Log(EntryLevel = LogLevel.Debug, EntryText = "Test for '{@a1}', '{@a2}', '{@a3}'.")]
+		[Log(EntryLevel = LogLevel.Debug, EntryText = "Test for '{@i1}', '{@i2}', '{@r1}', '{@r2}'.")]
 		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Was called with params: {paramvalues}.")]
-		public static int MultipleArgsMethod(int a1, string a2, object a3) {
-			return a1 + 50;
+		[Log(ExitLevel = LogLevel.Fatal, ExitText = "Return value is: '{returnvalue}'.")]
+		public static int MultipleArgsMethod(int i1, string i2, ref int r1, ref object r2, out Guid o1, out string o2) {
+			o1 = Guid.NewGuid();
+			o2 = "X";
+			return i1 + 50;
 		}
 
 		[Log(LogLevel.Info, "Test message.")]
@@ -31,7 +35,12 @@ namespace Log4PostSharp.Test {
 
 			MethodWithNoReturnValue();
 			MethodWithNoReturnValue(Guid.NewGuid());
-			MultipleArgsMethod(1, "A", null);
+			int r1 = 10;
+			object r2 = "X";
+			Guid o1;
+			string o2;
+			MultipleArgsMethod(1, "A", ref r1, ref r2, out o1, out o2);
+
 			MethodWithGuidReturnValue();
 			MethodWithIntReturnValue();
 

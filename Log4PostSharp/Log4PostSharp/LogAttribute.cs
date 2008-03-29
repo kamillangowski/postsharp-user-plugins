@@ -59,6 +59,7 @@ namespace Log4PostSharp {
 	/// <listheader><term>Placeholder</term><description>Action</description></listheader>
 	/// <item><term>{@<i>parameter_name</i>}</term><description>Expanded to the value of the specified parameter of the method.</description></item>
 	/// <item><term>{paramvalues}</term><description>Expanded to the comma-separated list of values of all parameters of the method. Value of every parameter is surrounded by quote-signs.</description></item>
+	/// <item><term>{returnvalue}</term><description>Expanded to the value that the method returns. For methods that return no value, <see langword="null"/> is used.</description></item>
 	/// </list>
 	/// <para>Performance-wise, it does not make much of difference how many occurences of the "heavy" placeholders appear in a single
 	/// message. What matters is that these are used at all. Also, messages for the same method are treated

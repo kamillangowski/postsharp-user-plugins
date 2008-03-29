@@ -68,6 +68,11 @@ namespace Log4PostSharp.Weaver {
 		/// </summary>
 		private static readonly string parameterPrefix = "@";
 
+		/// <summary>
+		/// Placeholder that indicates method return value.
+		/// </summary>
+		private static readonly string returnValue = "returnvalue";
+
 		#endregion
 
 		#region Private Methods
@@ -150,6 +155,8 @@ namespace Log4PostSharp.Weaver {
 					// Add closing quote for the last parameter.
 					target.Add(new FixedToken(@""""));
 				}
+			} else if (string.Equals(placeholder, returnValue, StringComparison.InvariantCulture)) {
+				target.Add(new ReturnValueToken(wovenMethod.ReturnParameter));
 			} else {
 				throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Unknown placeholder in template: {0}.", placeholder));
 			}
