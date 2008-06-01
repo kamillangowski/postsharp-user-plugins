@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Log4PostSharp.Test {
@@ -45,6 +46,13 @@ namespace Log4PostSharp.Test {
 			MethodWithIntReturnValue();
 
 			new AnotherSubprogram<int>().Act<string>();
+		}
+
+		public class SubclassWithCompilerGeneratedCode {
+			public IEnumerable<string> MethodThatAddsCompilerGeneratedCode() {
+				yield return "A";
+				yield return "B";
+			}
 		}
 
 		public class Subprogram {

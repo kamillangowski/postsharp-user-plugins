@@ -114,6 +114,11 @@ namespace Log4PostSharp {
 		/// </summary>
 		private int aspectPriority = 0;
 
+		/// <summary>
+		/// Underlying field for the <see cref="IncludeCompilerGeneratedCode"/> property.
+		/// </summary>
+		private bool includeCompilerGeneratedCode = false;
+
 		#endregion
 
 		#region Public Properties
@@ -214,6 +219,21 @@ namespace Log4PostSharp {
 		public int AspectPriority {
 			get { return this.aspectPriority; }
 			set { this.aspectPriority = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets a value indicating whether the logging code is injected into the compiler-generated methods.
+		/// </summary>
+		/// <value>
+		/// <see langword="true"/> to inject the code into the compiler-generated methods
+		/// or <see langword="false"/> otherwise.
+		/// </value>
+		/// <remarks>
+		/// <para>Default value for this property is <see langword="false"/>.</para>
+		/// </remarks>
+		public bool IncludeCompilerGeneratedCode {
+			get { return this.includeCompilerGeneratedCode; }
+			set { this.includeCompilerGeneratedCode = value; }
 		}
 
 		#endregion

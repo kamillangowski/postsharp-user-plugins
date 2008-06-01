@@ -29,6 +29,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 using log4net;
 
@@ -67,6 +68,11 @@ namespace Log4PostSharp.Weaver {
 		/// log4net.ILog type.
 		/// </summary>
 		private ITypeSignature ilogType;
+
+		/// <summary>
+		/// System.Runtime.CompilerServices.CompilerGeneratedAttribute type.
+		/// </summary>
+		private IType compilerGeneratedAttributeType;
 
 		/// <summary>
 		/// Collection of support items for different log levels.
@@ -193,6 +199,7 @@ namespace Log4PostSharp.Weaver {
 			this.invariantCultureGetter = module.FindMethod(typeof (CultureInfo).GetProperty("InvariantCulture").GetGetMethod(), BindingOptions.Default);
 			this.getLoggerMethod = module.FindMethod(typeof (LogManager).GetMethod("GetLogger", new Type[] {typeof (Type)}), BindingOptions.Default);
 			this.ilogType = module.FindType(typeof (ILog), BindingOptions.Default);
+			this.compilerGeneratedAttributeType = module.FindType(typeof (CompilerGeneratedAttribute), BindingOptions.Default).GetTypeDefinition();
 
 			// Prepare level support items for all levels.
 			this.levelSupportItems[LogLevel.Debug] = this.CreateSupportItem("Debug");
@@ -226,47 +233,61 @@ namespace Log4PostSharp.Weaver {
 						// Constructs a custom attribute instance. 
 						LogAttribute attribute = (LogAttribute) CustomAttributeHelper.ConstructRuntimeObject(customAttributeEnumerator.Current.Value, this.Project.Module);
 
-						// Build an advice based on this custom attribute. 
-						LogAdvice advice = new LogAdvice(this, attribute);
+						bool isMethodEligibleForInjection;
+						
+						if (attribute.IncludeCompilerGeneratedCode) {
+							// Logging code can be injected even if the method is compiler generated.
+							// Method processing can safely continue.
+							isMethodEligibleForInjection = true;
+						} else {
+							// Proceed with the method only when it is not compiler generated and 
+							// its declaring type is not generated.
+							isMethodEligibleForInjection = ! (methodDef.CustomAttributes.Contains(this.compilerGeneratedAttributeType) || methodDef.DeclaringType.CustomAttributes.Contains(this.compilerGeneratedAttributeType));
+						}
 
-						// Join point kinds that are used by respective logging code.
-						JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
-						JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
-						JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
-						// Sum of all required join point kinds;
-						JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
+						if (isMethodEligibleForInjection) {
+							// Build an advice based on this custom attribute.
+							LogAdvice advice = new LogAdvice(this, attribute);
 
-						// Ensure there is at least one join point the logging advice applies to.
-						if (effectiveKinds != 0) {
-							if (!this.perTypeLoggingDatas.ContainsKey(wovenType)) {
-								this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
+							// Join point kinds that are used by respective logging code.
+							JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
+							JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
+							JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
+							// Sum of all required join point kinds;
+							JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
 
-								// Logging data for the woven type.
-								PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
+							// Ensure there is at least one join point the logging advice applies to.
+							if (effectiveKinds != 0) {
+								if (!this.perTypeLoggingDatas.ContainsKey(wovenType)) {
+									this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
 
-								// Field where ILog instance is stored.
-								FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
-								wovenType.Fields.Add(logField);
-								perTypeLoggingData.Log = logField;
+									// Logging data for the woven type.
+									PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
 
-								foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
-									LogLevel logLevel = levelsAndItems.Key;
+									// Field where ILog instance is stored.
+									FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
+									wovenType.Fields.Add(logField);
+									perTypeLoggingData.Log = logField;
 
-									string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
-									FieldDefDeclaration isLoggingEnabledField = CreateField(isLoggingEnabledFieldName, this.boolType);
-									wovenType.Fields.Add(isLoggingEnabledField);
-									perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
+									foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
+										LogLevel logLevel = levelsAndItems.Key;
+
+										string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
+										FieldDefDeclaration isLoggingEnabledField = CreateField(isLoggingEnabledFieldName, this.boolType);
+										wovenType.Fields.Add(isLoggingEnabledField);
+										perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
+									}
+
+									codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+									                              JoinPointKinds.BeforeStaticConstructor,
+									                              new Singleton<TypeDefDeclaration>(wovenType));
 								}
 
-								codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
-								                              JoinPointKinds.BeforeStaticConstructor,
-								                              new Singleton<TypeDefDeclaration>(wovenType));
+								codeWeaver.AddMethodLevelAdvice(advice,
+								                                new Singleton<MethodDefDeclaration>(methodDef),
+								                                effectiveKinds,
+								                                null);
 							}
-
-							codeWeaver.AddMethodLevelAdvice(advice,
-							                                new Singleton<MethodDefDeclaration>(methodDef),
-							                                effectiveKinds,
-							                                null);
 						}
 					}
 				}
