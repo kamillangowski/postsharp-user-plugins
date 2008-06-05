@@ -1,6 +1,8 @@
 #summary Describes how to start using Log4PostSharp
 #labels Featured
 
+_For questions, please visit the [http://www.postsharp.org/forum/postsharp4entlib.html support forum]._
+
 = Introduction =
 
 Log4PostSharp contains an aspect which uses PostSharp to inject MSIL code that writes messages to log4net log.
@@ -61,3 +63,5 @@ This causes that all three kinds of events are logged and method signatures are 
 === Remarks ===
 
 Use `Multicast` feature of the PostSharp to apply the attribute to all methods in order to log messages with `Debug` level. Besides of this you may additionally decorate chosen methods with `Info` level to log more important messages.
+
+_For questions, please visit the [http://www.postsharp.org/forum/postsharp4entlib.html support forum]._
