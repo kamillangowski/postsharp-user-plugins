@@ -1,6 +1,6 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 9.00
-# Visual Studio 2005
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp", "Log4PostSharp\Log4PostSharp.csproj", "{3CFD766D-B991-4444-84A6-49BDFF81CF63}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Weaver", "Log4PostSharp.Weaver\Log4PostSharp.Weaver.csproj", "{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}"
