@@ -269,15 +269,6 @@ namespace Log4PostSharp.Weaver {
 									wovenType.Fields.Add(logField);
 									perTypeLoggingData.Log = logField;
 
-									foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.levelSupportItems) {
-										LogLevel logLevel = levelsAndItems.Key;
-
-										string isLoggingEnabledFieldName = string.Format(CultureInfo.InvariantCulture, "~log4PostSharp~is{0}Enabled", logLevel);
-										FieldDefDeclaration isLoggingEnabledField = CreateField(isLoggingEnabledFieldName, this.boolType);
-										wovenType.Fields.Add(isLoggingEnabledField);
-										perTypeLoggingData.IsLoggingEnabledField[logLevel] = isLoggingEnabledField;
-									}
-
 									codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
 									                              JoinPointKinds.BeforeStaticConstructor,
 									                              new Singleton<TypeDefDeclaration>(wovenType));
@@ -346,19 +337,6 @@ namespace Log4PostSharp.Weaver {
 				// Assign logger to the log variable.
 				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
 				// Stack: .
-
-				foreach (KeyValuePair<LogLevel, LogLevelSupportItem> levelsAndItems in this.parent.levelSupportItems) {
-					LogLevel logLevel = levelsAndItems.Key;
-					LogLevelSupportItem logLevelSupportItem = levelsAndItems.Value;
-
-					// Check if the logger has debug output enabled.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
-					context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Callvirt, logLevelSupportItem.IsLoggingEnabledGetter);
-					// Stack: isDebugEnabled.
-					// Assign isDebugEnabled to the appropriate field.
-					context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.IsLoggingEnabledField[logLevel]));
-					// Stack: .
-				}
 
 				context.InstructionWriter.DetachInstructionSequence();
 			}

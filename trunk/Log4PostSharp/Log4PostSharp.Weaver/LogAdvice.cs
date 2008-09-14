@@ -29,9 +29,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
-using Log4PostSharp;
-using Log4PostSharp.Weaver;
-
 using PostSharp.CodeModel;
 using PostSharp.CodeModel.Helpers;
 using PostSharp.CodeWeaver;
@@ -63,25 +60,30 @@ namespace Log4PostSharp.Weaver {
 		/// Emits the MSIL code that jumps to the specified label if logging is disabled.
 		/// </summary>
 		/// <param name="emitter">IL emitter.</param>
-		/// <param name="loggingEnabledField">Field to check for indication whether the logging is enabled.</param>
-		/// <param name="afterLoggingSequence">Sequence to jup to if logging is disabled.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="emitter"/>, <paramref name="loggingEnabledField"/> or <paramref name="afterLoggingSequence"/> is <see langword="null"/>.</exception>
+		/// <param name="logLevelSupportItem">Item for the logging level.</param>
+		/// <param name="perTypeLoggingData">Data for the type being woven.</param>
+		/// <param name="afterLoggingSequence">Sequence to jump to if logging is disabled.</param>
+		/// <exception cref="ArgumentNullException"><paramref name="emitter"/>, <paramref name="logLevelSupportItem"/>, <paramref name="perTypeLoggingData"/> or <paramref name="afterLoggingSequence"/> is <see langword="null"/>.</exception>
 		/// <remarks>
 		/// <para>Code emitted by this method makes no assumptions on the state of the evaluation stack 
 		/// and it leaves the stack unmodified.</para>
 		/// </remarks>
-		private static void EmitLoggingEnabledCheck(InstructionEmitter emitter, FieldDefDeclaration loggingEnabledField, InstructionSequence afterLoggingSequence) {
+		private static void EmitLoggingEnabledCheck(InstructionEmitter emitter, LogLevelSupportItem logLevelSupportItem, PerTypeLoggingData perTypeLoggingData, InstructionSequence afterLoggingSequence) {
 			if (emitter == null) {
 				throw new ArgumentNullException("emitter");
 			}
-			if (loggingEnabledField == null) {
-				throw new ArgumentNullException("loggingEnabledField");
-			}
-			if (afterLoggingSequence == null) {
+		    if (logLevelSupportItem == null) {
+		        throw new ArgumentNullException("logLevelSupportItem");
+		    }
+		    if (perTypeLoggingData == null) {
+		        throw new ArgumentNullException("perTypeLoggingData");
+		    }
+		    if (afterLoggingSequence == null) {
 				throw new ArgumentNullException("afterLoggingSequence");
 			}
 
-			emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(loggingEnabledField));
+            emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
+            emitter.EmitInstructionMethod(OpCodeNumber.Callvirt,  logLevelSupportItem.IsLoggingEnabledGetter);
 			emitter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
 			emitter.EmitInstruction(OpCodeNumber.Ceq);
 			emitter.EmitBranchingInstruction(OpCodeNumber.Brtrue_S, afterLoggingSequence);
@@ -328,7 +330,7 @@ namespace Log4PostSharp.Weaver {
 				// Check if logging is enabled and log the message.
 				context.InstructionWriter.AttachInstructionSequence(logEntrySequence);
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
-				EmitLoggingEnabledCheck(context.InstructionWriter, perTypeLoggingData.IsLoggingEnabledField[level], afterLoggingSequence);
+			    EmitLoggingEnabledCheck(context.InstructionWriter, supportItem, perTypeLoggingData, afterLoggingSequence);
 				if (nonStaticTokens.Count == 0) {
 					// There are no dynamic tokens, use the faster logging method.
 					EmitLogString(context.InstructionWriter, perTypeLoggingData.Log, supportItem.LogStringMethod, messageFormatString.ToString());
@@ -402,7 +404,7 @@ namespace Log4PostSharp.Weaver {
 				context.InstructionWriter.AttachInstructionSequence(logExceptionSequence);
 				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 				context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Stloc_S, exception);
-				EmitLoggingEnabledCheck(context.InstructionWriter, perTypeLoggingData.IsLoggingEnabledField[level], afterLoggingSequence);
+				EmitLoggingEnabledCheck(context.InstructionWriter, supportItem, perTypeLoggingData, afterLoggingSequence);
 				EmitLogStringException(context.InstructionWriter, perTypeLoggingData.Log, supportItem.LogStringExceptionMethod, messageFormatString.ToString(), exception);
 				context.InstructionWriter.DetachInstructionSequence();
 
