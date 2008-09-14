@@ -24,44 +24,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-using System.Collections.Generic;
-
 using PostSharp.CodeModel;
 
 namespace Log4PostSharp.Weaver {
-	/// <summary>
-	/// Represents set of fields that are used to log messages.
-	/// </summary>
-	internal class PerTypeLoggingData {
-		/// <summary>
-		/// Field that points to the ILog instance.
-		/// </summary>
-		private FieldDefDeclaration log;
+    /// <summary>
+    /// Represents set of fields that are used to log messages.
+    /// </summary>
+    internal class PerTypeLoggingData {
+        /// <summary>
+        /// Field that points to the ILog instance.
+        /// </summary>
+        private FieldDefDeclaration log;
 
-		/// <summary>
-		/// Collection of fields that point to the isXXXEnabled field.
-		/// </summary>
-		private readonly Dictionary<LogLevel, FieldDefDeclaration> isLoggingEnabledField = new Dictionary<LogLevel, FieldDefDeclaration>();
+        /// <summary>
+        /// Gets or sets the field that points to the ILog instance.
+        /// </summary>
+        public FieldDefDeclaration Log {
+            get { return this.log; }
+            set { this.log = value; }
+        }
 
-		/// <summary>
-		/// Gets or sets the field that points to the ILog instance.
-		/// </summary>
-		public FieldDefDeclaration Log {
-			get { return this.log; }
-			set { this.log = value; }
-		}
-
-		/// <summary>
-		/// Gets the collection of fields that point to the isXXXEnabled field.
-		/// </summary>
-		public Dictionary<LogLevel, FieldDefDeclaration> IsLoggingEnabledField {
-			get { return this.isLoggingEnabledField; }
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="PerTypeLoggingData"/> class.
-		/// </summary>
-		public PerTypeLoggingData() {
-		}
-	}
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PerTypeLoggingData"/> class.
+        /// </summary>
+        public PerTypeLoggingData() {
+        }
+    }
 }
