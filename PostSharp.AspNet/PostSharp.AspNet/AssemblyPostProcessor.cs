@@ -120,7 +120,7 @@ namespace PostSharp.AspNet
 
             StringBuilder arguments = new StringBuilder();
             arguments.AppendFormat(
-                "\"/P:Output={0}\" \"/P:IntermediateDirectory={1} \"  /P:CleanIntermediate=False /P:ReferenceDirectory=. /P:SignAssembly=False /P:PrivateKeyLocation= \"/P:SearchPath=",
+                "\"/P:Output={0}\" \"/P:IntermediateDirectory={1} \"  /P:CleanIntermediate=False /P:ReferenceDirectory=. /P:SignAssembly=False /P:PrivateKeyLocation= /P:ResolvedReferences= \"/P:SearchPath=",
                 outputAssembly, intermediateDirectory);
 
             foreach (NameValueConfigurationElement searchPath in this.configuration.SearchPath)
