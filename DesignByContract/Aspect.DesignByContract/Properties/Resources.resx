@@ -1,0 +1,294 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ExcAccessToDoubleType" xml:space="preserve">
+    <value>Der Typ '{0}' ist in mehreren Assemblys definiert. Bitte geben Sie die vollständige Beschreibung des Typs in dem Kontrak an ('Namespace.TypeName'). Liste der doppelten Definitionen:{1}</value>
+  </data>
+  <data name="ExcAssemblyNull" xml:space="preserve">
+    <value>Die übergebene Assembly ist nicht definiert.</value>
+  </data>
+  <data name="ExcCantFindMethodBegin" xml:space="preserve">
+    <value>Es konnte keine passende Methode mit dem Schlüssel '</value>
+  </data>
+  <data name="ExcCantFindMethodEnd" xml:space="preserve">
+    <value>' gefunden werden.</value>
+  </data>
+  <data name="ExcCompileError" xml:space="preserve">
+    <value>Es ist ein Fehler beim Erzeugen des Kontrakts für das Element '{0}' (Assembly: '{1}', Namespace: '{2}', Klasse: '{3}') aufgetreten. Fehlermeldung aus dem System: {4}</value>
+  </data>
+  <data name="ExcContractClassIsNull" xml:space="preserve">
+    <value>Das Objekt welches mit dem Schlüssel {0} gespeichert wurde ist null.</value>
+  </data>
+  <data name="ExcContractClassNotExist" xml:space="preserve">
+    <value>Es existiert kein IContract Objekt mit dem Schlüssel {0}.</value>
+  </data>
+  <data name="ExcContractedMemberIsNull" xml:space="preserve">
+    <value>Das übergebene Element ist 'null'.</value>
+  </data>
+  <data name="ExcContractIsNull" xml:space="preserve">
+    <value>Der übergebene Kontrakt ist 'null' bzw. leer</value>
+  </data>
+  <data name="ExcContractListIsNull" xml:space="preserve">
+    <value>Die Liste mit den übergebenen Kontrakten ist Leer.</value>
+  </data>
+  <data name="ExcContractNotValid" xml:space="preserve">
+    <value>Die Bedingung '{0}' wurde im Element '{1}' nicht erfüllt.</value>
+  </data>
+  <data name="ExcElementisNoMemberInfo" xml:space="preserve">
+    <value>Das übergebene Element '{0}' ist nicht vom MemberInfo</value>
+  </data>
+  <data name="ExcElementIsNull" xml:space="preserve">
+    <value>Das Objekt element darf nicht 'null' sein.</value>
+  </data>
+  <data name="ExcEmptyContract" xml:space="preserve">
+    <value>Es wurden nicht alle Kontrakte definiert. Bitte tragen sie einen Kontrakt ein oder wählen Sie einen anderen Konstruktor und benutzen ggf. die bennanten Parameter DbcAccessType oder DbcCheckTime.</value>
+  </data>
+  <data name="ExcErrorInContract" xml:space="preserve">
+    <value>Beim Prüfen eines Kontrakts ist ein unerwarteter Fehler aufgetreten. Der Kontrakt '{0}' für das Element '{1}' konnte nicht geprüft werden.</value>
+  </data>
+  <data name="ExcMoreClassesInContractAssembly" xml:space="preserve">
+    <value>In der Assembly {0} sind mehr als eine Klasse definiert. Dadurch ist die Assembly nicht gültig.</value>
+  </data>
+  <data name="ExcNoGenericParameter" xml:space="preserve">
+    <value>Der Typ {0} ist kein Generischer Paramter</value>
+  </data>
+  <data name="ExcNoGetContracts" xml:space="preserve">
+    <value>Sie haben keine Kontraktprüfungen für den Lesezugriff angegeben. Bitte Benutzen Sie in diesem Fall einen anderen Konstruktor und übergeben die benannten Paramter DbcAccessType.</value>
+  </data>
+  <data name="ExcNoGetMethodAvailable" xml:space="preserve">
+    <value>Achtung kann auf Eigenschaft '{0}' nicht zugreifen, da eine Get Methode fehlt.</value>
+  </data>
+  <data name="ExcNoIContractClass" xml:space="preserve">
+    <value>In der Assembly {0} ist der zu ladende Typ keine Klasse die von der IContract Schnittstelle ableitet.</value>
+  </data>
+  <data name="ExcNoSetContracts" xml:space="preserve">
+    <value>Sie haben keine Kontraktprüfungen für den Schreibzugriff angegeben. Bitte Benutzen Sie in diesem Fall einen anderen Konstruktor und übergeben die benannten Paramter DbcAccessType.</value>
+  </data>
+  <data name="ExcNotValidDbcExceptionType" xml:space="preserve">
+    <value>Der übergebene DbcExceptionType ist keine Ableitung von System.Exception.</value>
+  </data>
+  <data name="ExcOldAccesNotValidOnField" xml:space="preserve">
+    <value>Der Apekt Parameter '{0}' kann nicht an Felder definiert werden da ein Feld nur bei Zugriffen (Lese oder Schreibzugriff) den Kontrakt prüfen kann.</value>
+  </data>
+  <data name="ExcOldAccesNotValidOnMethodAndProperty" xml:space="preserve">
+    <value>Der Apekt-Parameter '{0}' kann nicht in Eintrittskontrakte definiert werden da es zu diesem Zeitpunkt keinen alten Wert gibt.</value>
+  </data>
+  <data name="ExcOnlyOneContract" xml:space="preserve">
+    <value>Sie haben lediglich einen Kontrakt definiert für diesen Fall benutzen Sie bitte den Kontruktor mit einem Kontrakt als Übergabeparameter und setzen Sie die benannten Parameter DbcAccessType und DbcCheckTime.</value>
+  </data>
+  <data name="ExcResultAccesNotValidOnMethodAndProperty" xml:space="preserve">
+    <value>Der Apekt-Parameter '{0}' kann nicht in Eintrittskontrakte definiert werden da es zu diesem Zeitpunkt keinen Rückgabewert Wert gibt.</value>
+  </data>
+  <data name="ExcResultNotValidOnField" xml:space="preserve">
+    <value>Der Aspekt-Parameter '{0}' darf nicht verwendet werden wenn der Kontrakt auch bei Schreibzugriff (set) geprüft werden soll.</value>
+  </data>
+  <data name="ExcTooManyContractsDefined" xml:space="preserve">
+    <value>Sie können den Konstruktor mit 4 Übergabeparametern nur an Eigenschaften definieren.</value>
+  </data>
+  <data name="ExcTooManyContractsOnGetOrSet" xml:space="preserve">
+    <value>Es werden keine vier Kontrakte benötigt, um lediglich ein Lesezugriff (get) bzw. ein Schreibzugriff (set) zu prüfen.</value>
+  </data>
+  <data name="ExcValueAccesNotValidOnMethodAndProperty" xml:space="preserve">
+    <value>Der Apekt-Parameter '{0}' kann nicht in Kontrakten verwendet werden die an Methoden oder bei Lesezugriff (get) von Eigenschaften, definiert sind.</value>
+  </data>
+  <data name="ExcValueNotValidOnField" xml:space="preserve">
+    <value>Der Aspekt-Parameter '{0}' darf nicht verwendet werden wenn der Kontrakt auch bei Lesezugriff (get) geprüft werden soll.</value>
+  </data>
+  <data name="ExcWrongDbcAccessTypeUse" xml:space="preserve">
+    <value>Der benannte Parameter DbcAccessType hat keinen Auswirkungen auf Methoden. Bitte löschen Sie den Parameter da Sie sonst andere Entwickler evtl. verwirren.</value>
+  </data>
+  <data name="ExcWrongDbcAccessTypeUseOnField" xml:space="preserve">
+    <value>Zwei Kontrakte können nur an Felder definiert werden wenn DbcAccessType = Both ist.</value>
+  </data>
+  <data name="ExcWrongDbcCheckTimeUse" xml:space="preserve">
+    <value>Der benannte Parameter DbcCheckTime hat keinen Auswirkungen auf Felder. Bitte löschen Sie den Parameter da Sie sonst andere Entwickler evtl. verwirren.</value>
+  </data>
+  <data name="ExcWrongDbcCheckTimeUseOnMethod" xml:space="preserve">
+    <value>Zwei Kontrakte können nur an Methoden definiert werden wenn DbcCheckTime = Both ist.</value>
+  </data>
+  <data name="ExcWrongDbcCheckTimeUseOnMethodAndProperty" xml:space="preserve">
+    <value>Zwei Kontrakte können nur an Eigenschaften und Methoden definiert werden wenn DbcCheckTime = Both ist.Wenn Sie einen Kontrakt nur bei Aurtritt oder bei Eintrittmöchten verwenden Sie bitte den Kontrakt mit einem Übergabeparameter. Wenn Sie eine Eigenschaft nur bei Eintritt oder Austriit für get und für set prüfen möchten, benutzen den Konstruktor mit4 Übergabeparameter und übergeben Sie ggf. 'null' bzw. string.Empty.</value>
+  </data>
+  <data name="StrAspectParameterOldAccess" xml:space="preserve">
+    <value>[old]</value>
+  </data>
+  <data name="StrAspectParameterResultAccess" xml:space="preserve">
+    <value>[result]</value>
+  </data>
+  <data name="StrAspectParameterValueAccess" xml:space="preserve">
+    <value>[value]</value>
+  </data>
+  <data name="StrAssemblyFileExt" xml:space="preserve">
+    <value>.Contracts.dll</value>
+  </data>
+  <data name="StrCheckContractMethodName" xml:space="preserve">
+    <value>CheckContract</value>
+  </data>
+  <data name="StrContractClassPrefix" xml:space="preserve">
+    <value>ContractClass_</value>
+  </data>
+  <data name="StrContractMethodPrefix" xml:space="preserve">
+    <value>ContractMethod_</value>
+  </data>
+  <data name="StrGetOldPrarameterMethodName" xml:space="preserve">
+    <value>GetOldValues</value>
+  </data>
+  <data name="StrGetOldValueMethodPrefix" xml:space="preserve">
+    <value>GetOldValueMethod_</value>
+  </data>
+  <data name="StrNameSpace" xml:space="preserve">
+    <value>DesignByContract</value>
+  </data>
+  <data name="StrParameterContractArguments" xml:space="preserve">
+    <value>contractArguments</value>
+  </data>
+  <data name="StrParameterContractKey" xml:space="preserve">
+    <value>contractKey</value>
+  </data>
+  <data name="StrParameterException" xml:space="preserve">
+    <value>exception</value>
+  </data>
+  <data name="StrParameterGenericTypes" xml:space="preserve">
+    <value>genericTypes</value>
+  </data>
+  <data name="StrParameterInstance" xml:space="preserve">
+    <value>instance</value>
+  </data>
+  <data name="StrParameterMethodResult" xml:space="preserve">
+    <value>methodResult</value>
+  </data>
+  <data name="StrParameterOldValues" xml:space="preserve">
+    <value>oldValues</value>
+  </data>
+  <data name="StrPdbFileExt" xml:space="preserve">
+    <value>.Contracts.pdb</value>
+  </data>
+  <data name="StrSourceCodeFielExt" xml:space="preserve">
+    <value>.Contracts.cs</value>
+  </data>
+  <data name="StrSystemNameSpace" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="ExcMethodIsVoid" xml:space="preserve">
+    <value>Die Methode '{0}' kann nicht angegeben werden, da sie 'void' zurückgibt.</value>
+  </data>
+  <data name="ExcMorePublicMemberFound" xml:space="preserve">
+    <value>Es wurden mehrere Elemente mit dem Namen '{0}' gefunden.</value>
+  </data>
+</root>
