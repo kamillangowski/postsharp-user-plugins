@@ -41,19 +41,19 @@ namespace TestApplicationPostSharp1_5.UnitTest
 			}
 		}
 
-		[Test]
-		public void Set50ToIContractInterface()
-		{
-			try
-			{
-				mIContractInterfaceObject.TestProperty = 50;
-			}
-			catch
-			{
-				return;
-			}
-			Assert.Fail("Es wurde keine Exception geworfen!");
-		}
+//		[Test]
+//		public void Set50ToIContractInterface()
+//		{
+//			try
+//			{
+//				mIContractInterfaceObject.TestProperty = 50;
+//			}
+//			catch
+//			{
+//				return;
+//			}
+//			Assert.Fail("Es wurde keine Exception geworfen!");
+//		}
 
 		[Test]
 		public void SetTRUEToIContractInterface()
