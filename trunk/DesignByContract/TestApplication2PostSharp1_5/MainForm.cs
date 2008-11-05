@@ -7,8 +7,8 @@
 * STP Informationstechnologie AG.
 *
 * ---------------------------------------------------------------------------*/
-/// <originalauthor>Patrick.Jahnke</originalauthor>
-/// <createdate>05.11.2008 14:32:41</createdate>
+/// <originalauthor>Patrick Jahnke</originalauthor>
+/// <createdate>05.11.2008 23:38:02</createdate>
 
 using System;
 using System.Collections.Generic;
@@ -17,24 +17,25 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-using TestApplicationPostSharp1_5.UnitTest;
+using TestApplication2PostSharp1_5.UnitTest;
 
-namespace TestApplicationPostSharp1_5
+namespace TestApplication2PostSharp1_5
 {
-	public partial class MainForm : Form
-	{
-		public MainForm()
-		{
-			InitializeComponent();
-		}
+    public partial class MainForm : Form
+    {
+        public MainForm()
+        {
+            InitializeComponent();
+        }
 
-		private void btnNUnit_Click(object sender, EventArgs e)
-		{
-			UnitTestsIContractInterface test = new UnitTestsIContractInterface();
-			test.SetFALSEToIContractInterface();
-			test.SetTRUEToIContractInterface();
-			test.TearDown();
-			test = null;
-		}
-	}
+        private void btnNUnit_Click(object sender, EventArgs e)
+        {
+            UnitTestsAbstractClass test = new UnitTestsAbstractClass();
+            test.Set150ToAbstractClass();
+            test.Set50ToAbstractClass();
+            test.TearDown();
+            test = null;
+
+        }
+    }
 }

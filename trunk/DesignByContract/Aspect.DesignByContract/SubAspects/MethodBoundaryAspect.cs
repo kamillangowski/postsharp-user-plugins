@@ -42,7 +42,9 @@ namespace Aspect.DesignByContract.SubAspects
 	[Serializable]
 	internal class MethodBoundaryAspect : OnMethodBoundaryAspect
 	{
-
+        // BUG
+        // Bitte wieder entfernen dirty Hack
+        private bool mStarted = false;
 		#region Interne Variablen (2) 
 
 		/// <summary>
@@ -65,6 +67,10 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für die Methode die aufgerufen wurde.</param>
 		public override void OnEntry(MethodExecutionEventArgs eventArgs)
 		{
+            if (mContractModel.ContractAssembly == null)
+                return;
+
+            Initialize(eventArgs.Method);
 			// Die Typen die zur Designzeit als generisch geladen wurden müssen
 			// zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
 			// Typen laden. Es müssen die Typen immer geladen werden, da es sonst
@@ -149,7 +155,8 @@ namespace Aspect.DesignByContract.SubAspects
 				ExpressionController expressionController = new ExpressionController();
 				ExpressionModel expressionModel = null;
 
-				if ((mContractModel.RequireContract != null)
+                //System.Windows.Forms.MessageBox.Show(mContractModel.RequireContract.Contract + "\n\r" + mContractModel.EnsureContract.Contract);
+                if ((mContractModel.RequireContract != null)
 					&& (!(string.IsNullOrEmpty(mContractModel.RequireContract.Contract))))
 				{
 					// Ausdruck übersetzen
@@ -204,6 +211,27 @@ namespace Aspect.DesignByContract.SubAspects
 				new Object[] { elementName, assemblyName, namespaceName, className, error });
 		}
 
+        private void Initialize(MethodBase method)
+        {
+            if (mStarted)
+                return;
+            mStarted = true;
+            if (mContractModel.ContractAssembly == null)
+                return;
+#if (DEBUG)
+            ContractController.Instance.LoadContractAssembly(
+                method.DeclaringType.Assembly,
+                mContractModel.ContractClassName,
+                mContractModel.ContractAssembly,
+                mContractModel.PdbFile,
+                mContractModel.SourceCodeFile);
+#else
+			ContractController.Instance.LoadContractAssembly(
+				mContractModel.ContractClassName,
+				mContractModel.ContractAssembly);
+#endif
+        }
+
 		/// <summary>
 		/// Wird aufgerufen wenn zur Laufzeit auf einen Aspekt initial zugegriffen wird = daraufhin 
 		/// werden alle Aspekte initalisiert.
@@ -211,22 +239,23 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="field">Methoden Element</param>
 		public override void RuntimeInitialize(MethodBase method)
 		{
-			if (mContractModel.ContractAssembly == null)
-				return;
-#if (DEBUG)
-			ContractController.Instance.LoadContractAssembly(
-				method.DeclaringType.Assembly,
-				mContractModel.ContractClassName,
-				mContractModel.ContractAssembly,
-				mContractModel.PdbFile,
-				mContractModel.SourceCodeFile);
-#else
-			ContractController.Instance.LoadContractAssembly(
-				mContractModel.ContractClassName,
-				mContractModel.ContractAssembly);
-#endif
+            return;
+//            if (mContractModel.ContractAssembly == null)
+//                return;
+//#if (DEBUG)
+//            ContractController.Instance.LoadContractAssembly(
+//                method.DeclaringType.Assembly,
+//                mContractModel.ContractClassName,
+//                mContractModel.ContractAssembly,
+//                mContractModel.PdbFile,
+//                mContractModel.SourceCodeFile);
+//#else
+//            ContractController.Instance.LoadContractAssembly(
+//                mContractModel.ContractClassName,
+//                mContractModel.ContractAssembly);
+//#endif
 
-			base.RuntimeInitialize(method);
+//            base.RuntimeInitialize(method);
 		}
 
 		#endregion Methoden 

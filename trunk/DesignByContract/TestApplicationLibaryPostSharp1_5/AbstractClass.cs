@@ -13,10 +13,14 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Aspect.DesignByContract;
+using PostSharp.Extensibility;
 
 namespace TestApplicationLibaryPostSharp1_5
 {
-	public class Class1
+	public abstract class AbstractClass
 	{
+        [Dbc("test>100", AttributeInheritance = MulticastInheritance.Strict)]
+        public abstract int TestMethod(int test);
 	}
 }

@@ -38,6 +38,7 @@ using Aspect.DesignByContract.Properties;
 using Aspect.DesignByContract.Enums;
 using Aspect.DesignByContract.Interface;
 using Aspect.DesignByContract.Exceptions;
+using PostSharp.Extensibility;
 
 namespace Aspect.DesignByContract.Controller
 {
@@ -464,6 +465,139 @@ namespace Aspect.DesignByContract.Controller
 			contractClass.Members.Add(mGetOldValuesMethodModel);
 		}
 
+        private int GetMethodCount(Type type, bool searchForPostSharpAtt, bool abstractClass)
+        {
+            int attributeCount = 0;
+            // Alle Methoden des Typs durchsuchen
+            MethodInfo[] methodInfos = type.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (MethodInfo methodInfo in methodInfos)
+            {
+                // BUG
+                // das Attribut wird nicht umgesetzt daher muss nach HasInheritedAttributeAttribute.
+                // Workaround
+                if (searchForPostSharpAtt)
+                {
+                    if (methodInfo.GetCustomAttributes(typeof(HasInheritedAttributeAttribute), true).Length > 0)
+                    {
+                        if ((!abstractClass) || (methodInfo.IsAbstract))
+                            attributeCount++;
+                    }
+                }
+                else
+                {
+                    object[] methodAttributeObjects = methodInfo.GetCustomAttributes(typeof(Dbc), true);
+                    foreach (object methodAttributeObject in methodAttributeObjects)
+                    {
+                        Dbc dbcAspect = (Dbc)methodAttributeObject;
+                        attributeCount += dbcAspect.GetNumberOfContracts();
+                    }
+                }
+            }
+            return attributeCount;
+        }
+
+        private int GetPropertyCount(Type type, bool searchForPostSharpAtt)
+        {
+            int attributeCount=0;
+            // Alle Eigenschaften des Typs durchsuchen
+            PropertyInfo[] propertyInfos = type.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (PropertyInfo propertyInfo in propertyInfos)
+            {
+                // BUG
+                // das Attribut wird nicht umgesetzt daher muss nach HasInheritedAttributeAttribute.
+                // Workaround
+                if (searchForPostSharpAtt)
+                {
+                    if (propertyInfo.GetCustomAttributes(typeof(HasInheritedAttributeAttribute), true).Length > 0)
+                        attributeCount++;
+                }
+                else
+                {
+                    object[] propertyAttributeObjects = propertyInfo.GetCustomAttributes(typeof(Dbc), true);
+                    foreach (object propertyAttributeObject in propertyAttributeObjects)
+                    {
+                        Dbc dbcAspect = (Dbc)propertyAttributeObject;
+                        attributeCount += dbcAspect.GetNumberOfContracts();
+                    }
+                }
+            }
+            return attributeCount;
+        }
+
+        private int GetFieldCount(Type type, bool searchForPostSharpAtt)
+        {
+            int attributeCount = 0;
+            // Alle Felder des Typs durchsuchen
+            FieldInfo[] fieldInfos = type.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (FieldInfo fieldInfo in fieldInfos)
+            {
+                // BUG
+                // das Attribut wird nicht umgesetzt daher muss nach HasInheritedAttributeAttribute.
+                // Workaround
+                if (searchForPostSharpAtt)
+                {
+                    if (fieldInfo.GetCustomAttributes(typeof(HasInheritedAttributeAttribute), true).Length > 0)
+                        attributeCount++;
+                }
+                else
+                {
+                    object[] fieldAttributeObjects = fieldInfo.GetCustomAttributes(typeof(Dbc), true);
+                    foreach (object fieldAttributeObject in fieldAttributeObjects)
+                    {
+                        Dbc dbcAspect = (Dbc)fieldAttributeObject;
+                        attributeCount += dbcAspect.GetNumberOfContracts();
+                    }
+                }
+            }
+            return attributeCount;
+        }
+
+        private int GetConstructorCount(Type type, bool searchForPostSharpAtt, bool abstractClass)
+        {
+            int attributeCount = 0;
+            // Alle Konstruktoren des Typs durchsuchen
+            ConstructorInfo[] constructurInfos = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
+            foreach (ConstructorInfo constructurInfo in constructurInfos)
+            {
+                // BUG
+                // das Attribut wird nicht umgesetzt daher muss nach HasInheritedAttributeAttribute.
+                // Workaround
+                if (searchForPostSharpAtt)
+                {
+                    if (constructurInfo.GetCustomAttributes(typeof(HasInheritedAttributeAttribute), true).Length > 0)
+                    {
+                        if ((!abstractClass) || (constructurInfo.IsAbstract))
+                            attributeCount++;
+                    }
+                }
+                else
+                {
+                    object[] constructorAttributeObjects = constructurInfo.GetCustomAttributes(typeof(Dbc), true);
+                    foreach (object constructorAttributeObject in constructorAttributeObjects)
+                    {
+                        Dbc dbcAspect = (Dbc)constructorAttributeObject;
+                        attributeCount += dbcAspect.GetNumberOfContracts();
+                    }
+                }
+            }
+            return attributeCount;
+        }
+
+        private int GetTypeCount(Type type, bool searchForPostSharpAtt, bool abstractClass)
+        {
+            int attributeCount = 0;
+
+            attributeCount += GetConstructorCount(type, searchForPostSharpAtt, abstractClass);
+            attributeCount += GetMethodCount(type, searchForPostSharpAtt, abstractClass);
+            if (!abstractClass)
+            {
+                attributeCount += GetFieldCount(type, searchForPostSharpAtt);
+                attributeCount += GetPropertyCount(type, searchForPostSharpAtt);
+            }
+
+            return attributeCount;
+        }
+
 		/// <summary>
 		/// Ermittelt wie oft der DbcAspect in einer Assembly vorkommt.
 		/// </summary>
@@ -477,56 +611,20 @@ namespace Aspect.DesignByContract.Controller
 			Type[] assemblyTypes = contractedAssembly.GetTypes();
 			foreach (Type assemblyType in assemblyTypes)
 			{
-
-				// Alle Methoden des Typs durchsuchen
-				MethodInfo[] methodInfos = assemblyType.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-				foreach (MethodInfo methodInfo in methodInfos)
-				{
-					object[] methodAttributeObjects = methodInfo.GetCustomAttributes(typeof(Dbc), true);
-					foreach (object methodAttributeObject in methodAttributeObjects)
-					{
-						Dbc dbcAspect = (Dbc)methodAttributeObject;
-						attributeCount += dbcAspect.GetNumberOfContracts();
-					}
-				}
-
-				// Alle Eigenschaften des Typs durchsuchen
-				PropertyInfo[] propertyInfos = assemblyType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-				foreach (PropertyInfo propertyInfo in propertyInfos)
-				{
-					object[] propertyAttributeObjects = propertyInfo.GetCustomAttributes(typeof(Dbc), true);
-					foreach (object propertyAttributeObject in propertyAttributeObjects)
-					{
-						Dbc dbcAspect = (Dbc)propertyAttributeObject;
-						attributeCount += dbcAspect.GetNumberOfContracts();
-					}
-				}
-
-				// Alle Konstruktoren des Typs durchsuchen
-				ConstructorInfo[] constructurInfos = assemblyType.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-				foreach (ConstructorInfo constructurInfo in constructurInfos)
-				{
-					object[] constructorAttributeObjects = constructurInfo.GetCustomAttributes(typeof(Dbc), true);
-					foreach (object constructorAttributeObject in constructorAttributeObjects)
-					{
-						Dbc dbcAspect = (Dbc)constructorAttributeObject;
-						attributeCount += dbcAspect.GetNumberOfContracts();
-					}
-				}
-
-				// Alle Felder des Typs durchsuchen
-				FieldInfo[] fieldInfos = assemblyType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic);
-				foreach (FieldInfo fieldInfo in fieldInfos)
-				{
-					object[] fieldAttributeObjects = fieldInfo.GetCustomAttributes(typeof(Dbc), true);
-					foreach (object fieldAttributeObject in fieldAttributeObjects)
-					{
-						Dbc dbcAspect = (Dbc)fieldAttributeObject;
-						attributeCount += dbcAspect.GetNumberOfContracts();
-					}
-				}
+                attributeCount += GetTypeCount(assemblyType, false, false);
+                foreach (Type interfaceType in assemblyType.GetInterfaces())
+                {
+                    attributeCount += GetTypeCount(interfaceType, true, false);
+                }
+                Type baseType = assemblyType.BaseType;
+                while (baseType != null)
+                {
+                    if (baseType.IsAbstract)
+                        attributeCount += GetTypeCount(baseType, true, true);
+                    baseType = baseType.BaseType;
+                }
 			}
-			return attributeCount;
+            return attributeCount;
 		}
 
 		/// <summary>
