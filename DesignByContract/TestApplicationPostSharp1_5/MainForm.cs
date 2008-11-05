@@ -32,7 +32,7 @@ namespace TestApplicationPostSharp1_5
 		{
 			UnitTests test = new UnitTests();
 			test.Set150ToIContractInterface();
-			test.Set50ToIContractInterface();
+			//test.Set50ToIContractInterface();
 			test.SetFALSEToIContractInterface();
 			test.SetTRUEToIContractInterface();
 			test.TearDown();
