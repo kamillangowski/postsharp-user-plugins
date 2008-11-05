@@ -189,6 +189,8 @@ namespace Aspect.DesignByContract.Controller
 			// *.vshost.EXTENSION) da eine Referenz erst dann als Referenz gilt wenn ein 
 			// Typ aus dieser Assembly definiert ist.
 			string referencePath = Path.GetDirectoryName(assembly.Location).Replace(@"\obj\", @"\bin\");
+			// BUG: Das Verzeichnis \Before-PostSharp muss entfernt werden -> kam mit PostSharp 1.5
+			referencePath = referencePath.Replace(@"\Before-PostSharp", "");
 			DirectoryInfo referenceDirectory = new DirectoryInfo(referencePath);
 			foreach (FileInfo referenceFile in referenceDirectory.GetFiles())
 			{

@@ -25,17 +25,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using PostSharp.Extensibility;
-using Aspect.DesignByContract.Enums;
-using Aspect.DesignByContract.MessageSources;
-using PostSharp.Laos;
 using System.Reflection;
-using Aspect.DesignByContract.Properties;
-using Aspect.DesignByContract.Exceptions;
 using Aspect.DesignByContract.Controller;
-using Aspect.DesignByContract.SubAspects;
+using Aspect.DesignByContract.Enums;
+using Aspect.DesignByContract.Exceptions;
+using Aspect.DesignByContract.MessageSources;
 using Aspect.DesignByContract.Models;
+using Aspect.DesignByContract.Properties;
+using Aspect.DesignByContract.SubAspects;
+using PostSharp.Extensibility;
+using PostSharp.Laos;
 
 namespace Aspect.DesignByContract
 {
