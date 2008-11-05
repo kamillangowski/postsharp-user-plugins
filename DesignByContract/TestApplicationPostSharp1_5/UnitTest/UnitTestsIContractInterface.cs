@@ -7,11 +7,11 @@ using TestApplicationLibaryPostSharp1_5;
 namespace TestApplicationPostSharp1_5.UnitTest
 {
 	[TestFixture]
-	public class UnitTests
+	public class UnitTestsIContractInterface
 	{
 		private IContractInterfaceObject mIContractInterfaceObject = null;
 
-		public UnitTests()
+		public UnitTestsIContractInterface()
 		{
 			SetUp();
 		}
@@ -27,33 +27,6 @@ namespace TestApplicationPostSharp1_5.UnitTest
 		{
 			mIContractInterfaceObject = null;
 		}
-
-		[Test]
-		public void Set150ToIContractInterface()
-		{
-			try
-			{
-				mIContractInterfaceObject.TestProperty=150;
-			}
-			catch (Exception exception)
-			{
-				Assert.Fail("Fehler aufgetreten:" + exception.ToString());
-			}
-		}
-
-//		[Test]
-//		public void Set50ToIContractInterface()
-//		{
-//			try
-//			{
-//				mIContractInterfaceObject.TestProperty = 50;
-//			}
-//			catch
-//			{
-//				return;
-//			}
-//			Assert.Fail("Es wurde keine Exception geworfen!");
-//		}
 
 		[Test]
 		public void SetTRUEToIContractInterface()

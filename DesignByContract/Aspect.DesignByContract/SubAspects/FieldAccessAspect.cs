@@ -44,6 +44,9 @@ namespace Aspect.DesignByContract.SubAspects
 	{
 
 		#region Interne Variablen (1) 
+        // BUG
+        // Bitte wieder entfernen dirty Hack
+        private bool mStarted = false;
 
 		/// <summary>
 		/// Für die Methode gültiges KontraktModel.
@@ -60,6 +63,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für das Feld auf das ein Lesezugriff ausgeführt wird.</param>
 		public override void OnGetValue(FieldAccessEventArgs eventArgs)
 		{
+            Initialize(eventArgs.FieldInfo);
 			if (mFieldModel.DbcAccessType == AccessType.OnlyOnSet)
 			{
 				base.OnGetValue(eventArgs);
@@ -99,6 +103,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für das Feld auf das ein Schreibzugriff ausgeführt wird.</param>
 		public override void OnSetValue(FieldAccessEventArgs eventArgs)
 		{
+            Initialize(eventArgs.FieldInfo);
 			if (mFieldModel.DbcAccessType == AccessType.OnlyOnGet)
 			{
 				base.OnSetValue(eventArgs);
@@ -217,6 +222,35 @@ namespace Aspect.DesignByContract.SubAspects
 				new Object[] { elementName, assemblyName, namespaceName, className, error });
 		}
 
+        private void Initialize(FieldInfo field)
+        {
+            if (mStarted)
+                return;
+            mStarted = true;
+
+            // Die Typen die zur Designzeit als generisch geladen wurden müssen
+            // zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
+            // Typen laden.
+            if (mFieldModel.GenericClassTypes == null)
+                mFieldModel.GenericClassTypes = field.DeclaringType.GetGenericArguments();
+
+
+            if (mFieldModel.ContractAssembly == null)
+                return;
+#if (DEBUG)
+            ContractController.Instance.LoadContractAssembly(
+                field.DeclaringType.Assembly,
+                mFieldModel.ContractClassName,
+                mFieldModel.ContractAssembly,
+                mFieldModel.PdbFile,
+                mFieldModel.SourceCodeFile);
+#else
+			ContractController.Instance.LoadContractAssembly(
+				mFieldModel.ContractClassName,
+				mFieldModel.ContractAssembly);
+#endif
+        }
+
 		/// <summary>
 		/// Wird aufgerufen wenn zur Laufzeit auf einen Aspekt initial zugegriffen wird = daraufhin 
 		/// werden alle Aspekte initalisiert.
@@ -224,32 +258,33 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="field">Feld Element</param>
 		public override void RuntimeInitialize(FieldInfo field)
 		{
-			// Die Typen die zur Designzeit als generisch geladen wurden müssen
-			// zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
-			// Typen laden.
-			if (mFieldModel.GenericClassTypes == null)
-				mFieldModel.GenericClassTypes = field.DeclaringType.GetGenericArguments();
+            return;
+//            // Die Typen die zur Designzeit als generisch geladen wurden müssen
+//            // zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
+//            // Typen laden.
+//            if (mFieldModel.GenericClassTypes == null)
+//                mFieldModel.GenericClassTypes = field.DeclaringType.GetGenericArguments();
 
 
-			if (mFieldModel.ContractAssembly == null)
-				return;
-#if (DEBUG)
-			ContractController.Instance.LoadContractAssembly(
-				field.DeclaringType.Assembly,
-				mFieldModel.ContractClassName,
-				mFieldModel.ContractAssembly,
-				mFieldModel.PdbFile,
-				mFieldModel.SourceCodeFile);
-#else
-			ContractController.Instance.LoadContractAssembly(
-				mFieldModel.ContractClassName,
-				mFieldModel.ContractAssembly);
-#endif
+//            if (mFieldModel.ContractAssembly == null)
+//                return;
+//#if (DEBUG)
+//            ContractController.Instance.LoadContractAssembly(
+//                field.DeclaringType.Assembly,
+//                mFieldModel.ContractClassName,
+//                mFieldModel.ContractAssembly,
+//                mFieldModel.PdbFile,
+//                mFieldModel.SourceCodeFile);
+//#else
+//            ContractController.Instance.LoadContractAssembly(
+//                mFieldModel.ContractClassName,
+//                mFieldModel.ContractAssembly);
+//#endif
 
-			base.RuntimeInitialize(field);
-		}
+//            base.RuntimeInitialize(field);
+        }
 
-		#endregion Methoden 
+        #endregion Methoden 
 
 	}
 }
