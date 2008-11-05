@@ -2,8 +2,10 @@
   <Settings activeconfig="Release" />
   <Config name="Debug" binpathtype="Auto">
     <assembly path="TestApplication\bin\Debug\TestApplication.exe" />
+    <assembly path="TestApplicationPostSharp1_5\bin\Debug\TestApplicationPostSharp1_5.exe" />
   </Config>
   <Config name="Release" binpathtype="Auto">
     <assembly path="TestApplication\bin\Release\TestApplication.exe" />
+    <assembly path="TestApplicationPostSharp1_5\bin\Release\TestApplicationPostSharp1_5.exe" />
   </Config>
 </NUnitProject>

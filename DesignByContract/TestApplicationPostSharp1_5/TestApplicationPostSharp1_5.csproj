@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{52FB14DD-E30D-4E4D-8725-549CA2BBD57F}</ProjectGuid>
+    <ProjectGuid>{6AF48892-FFA1-494D-8B27-270E7FE086BC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TestApplication</RootNamespace>
-    <AssemblyName>TestApplication</AssemblyName>
+    <RootNamespace>TestApplicationPostSharp1_5</RootNamespace>
+    <AssemblyName>TestApplicationPostSharp1_5</AssemblyName>
     <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,13 +32,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=2.4.6.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL">
-      <HintPath>C:\Programme\NUnit 2.4.6\bin\nunit.framework.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="PostSharp.Laos, Version=1.0.8.316, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Laos, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="PostSharp.Public, Version=1.0.8.316, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Public, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="System" />
@@ -49,12 +48,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AspectTest.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="AspectTest.Designer.cs">
-      <DependentUpon>AspectTest.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -63,10 +56,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="AspectTest.resx">
-      <DependentUpon>AspectTest.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -95,6 +84,10 @@
     <ProjectReference Include="..\Aspect.DesignByContract\Aspect.DesignByContract.csproj">
       <Project>{52B74DE9-7035-4A55-9994-12A7DC435405}</Project>
       <Name>Aspect.DesignByContract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TestApplicationLibaryPostSharp1_5\TestApplicationLibaryPostSharp1_5.csproj">
+      <Project>{15F3F4A6-B98A-4B0C-9A99-58EF4D658504}</Project>
+      <Name>TestApplicationLibaryPostSharp1_5</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

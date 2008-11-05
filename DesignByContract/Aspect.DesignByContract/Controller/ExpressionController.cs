@@ -65,7 +65,7 @@ namespace Aspect.DesignByContract.Controller
 
 		#endregion Kon/Destructoren (Dispose) 
 
-		#region Methoden (13) 
+		#region Methoden (17) 
 
 		/// <summary>
 		/// Typisiert den übergebenen Ausdruck.
@@ -224,7 +224,11 @@ namespace Aspect.DesignByContract.Controller
 		private ExpressionModel ConvertToPrivateMemberExpression(ExpressionModel expression, BindingFlags bindingFlags)
 		{
 			// Sucht ob expression der Name einer privaten Methode ist.
-			MethodInfo method = expression.DeclaringType.GetMethod(expression.Expression, bindingFlags);
+			MethodInfo method = null;
+			// BUG PostSharp Version 1.5 liefert nicht die Methoden zurück.
+			// method = expression.DeclaringType.GetMethod(expression.Expression, bindingFlags);
+			// woraround
+			method = GetMethodInfo(expression.Expression, expression.DeclaringType, bindingFlags);
 			string memberType = string.Empty;
 			if (method != null)
 			{
@@ -244,7 +248,12 @@ namespace Aspect.DesignByContract.Controller
 			}
 
 			// Sucht ob expression der Name einer privaten Eigenschaft ist.
-			PropertyInfo property = expression.DeclaringType.GetProperty(expression.Expression, bindingFlags);
+			PropertyInfo property = null;
+			// BUG PostSharp Version 1.5 liefert nicht die Eigenschaften zurück.
+			// property = expression.DeclaringType.GetProperty(expression.Expression, bindingFlags);
+			// Woraround
+			property = GetPropertyInfo(expression.Expression, expression.DeclaringType, bindingFlags);
+
 			if (property != null)
 			{
 				Type propertyType = null;
@@ -262,7 +271,11 @@ namespace Aspect.DesignByContract.Controller
 			}
 
 			// Sucht ob expression der Name eines privaten Feldes ist.
-			FieldInfo field = expression.DeclaringType.GetField(expression.Expression, bindingFlags);
+			FieldInfo field = null;
+			// BUG PostSharp Version 1.5 liefert nicht die Felder zurück.
+			// field = expression.DeclaringType.GetField(expression.Expression, bindingFlags);
+			// Workaround
+			field = GetFieldInfo(expression.Expression, expression.DeclaringType, bindingFlags);
 			if (field != null)
 			{
 				expression.ExpressionType = field.FieldType;
@@ -293,7 +306,15 @@ namespace Aspect.DesignByContract.Controller
 			if (!expression.DeclaringType.IsPublic)
 				return ConvertToPrivateMemberExpression(expression, BindingFlags.Public | BindingFlags.Instance);
 
-			MemberInfo[] memberInfos = expression.DeclaringType.GetMember(expression.Expression, BindingFlags.Public | BindingFlags.Instance);
+			MemberInfo[] memberInfos = null;
+			// BUG PostSharp Version 1.5 liefert nicht die Mitglieder zurück.
+			// MemberInfo[] memberInfos = null;
+			// memberInfos = expression.DeclaringType.GetMember(expression.Expression, BindingFlags.Public | BindingFlags.Instance);
+			// Workaround
+			MemberInfo tempMemberInfo = GetMemberInfo(expression.Expression, expression.DeclaringType, BindingFlags.Public | BindingFlags.Instance);
+			if (tempMemberInfo != null)
+				memberInfos = new MemberInfo[] { tempMemberInfo };
+
 			if ((memberInfos != null)
 				&& (memberInfos.Length > 0))
 			{
@@ -316,7 +337,6 @@ namespace Aspect.DesignByContract.Controller
 				}
 				else if (memberInfo is FieldInfo)
 					expression.ExpressionType = ((FieldInfo)memberInfo).FieldType;
-
 				string expressionType = expression.ExpressionType.FullName;
 				if (string.IsNullOrEmpty(expressionType))
 					expressionType = "object";
@@ -513,6 +533,102 @@ namespace Aspect.DesignByContract.Controller
 				return convertedExpression.ConvertedExpression + GetConvertedExpression(expression.Substring(nextElementPosition), element);
 			}
 			return ConvertElementExpression(expression, element).ConvertedExpression;
+		}
+
+		/// <summary>
+		/// Workaround um die FieldInfo von fieldName zu laden.
+		/// </summary>
+		/// <param name="fieldName">Name des Feldes das gefunden werden muss.</param>
+		/// <param name="declaringType">Typ in dem gesucht werden muss.</param>
+		/// <param name="bindingFlags">Ob private oder public gefunden werden soll</param>
+		/// <returns>FieldInfo -> erlogreich gefunden. null -> nichts gefunden</returns>
+		private FieldInfo GetFieldInfo(string fieldName, Type declaringType, BindingFlags bindingFlags)
+		{
+			FieldInfo[] fieldInfos = declaringType.GetFields(bindingFlags);
+			foreach (FieldInfo fieldInfo in fieldInfos)
+			{
+				if (fieldInfo.Name != fieldName)
+					continue;
+				if (((bindingFlags & BindingFlags.Public) != BindingFlags.Public)
+					&& ((bindingFlags & BindingFlags.NonPublic) != BindingFlags.NonPublic))
+					return fieldInfo;
+				else if (((bindingFlags & BindingFlags.Public) == BindingFlags.Public) && (fieldInfo.IsPublic))
+					return fieldInfo;
+				else if ((bindingFlags & BindingFlags.NonPublic) == BindingFlags.NonPublic)
+					return fieldInfo;
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Workaround um die MemberInfo von methodName zu laden.
+		/// </summary>
+		/// <param name="memberName">Name des Mitglieds das gefunden werden muss.</param>
+		/// <param name="declaringType">Typ in dem gesucht werden muss.</param>
+		/// <param name="bindingFlags">Ob private oder public gefunden werden soll</param>
+		/// <returns>MemberInfo -> erlogreich gefunden. null -> nichts gefunden</returns>
+		private MemberInfo GetMemberInfo(string memberName, Type declaringType, BindingFlags bindingFlags)
+		{
+			MemberInfo memberInfo = null;
+			memberInfo = GetPropertyInfo(memberName, declaringType, bindingFlags);
+			if (memberInfo != null)
+				return memberInfo;
+			memberInfo = GetMethodInfo(memberName, declaringType, bindingFlags);
+			if (memberInfo != null)
+				return memberInfo;
+			memberInfo = GetFieldInfo(memberName, declaringType, bindingFlags);
+			return memberInfo;
+		}
+
+		/// <summary>
+		/// Workaround um die MethodInfo von methodName zu laden.
+		/// </summary>
+		/// <param name="methodName">Name der Methode die gefunden werden muss.</param>
+		/// <param name="declaringType">Typ in dem gesucht werden muss.</param>
+		/// <param name="bindingFlags">Ob private oder public gefunden werden soll</param>
+		/// <returns>MethodInfo -> erlogreich gefunden. null -> nichts gefunden</returns>
+		private MethodInfo GetMethodInfo(string methodName, Type declaringType, BindingFlags bindingFlags)
+		{
+			MemberInfo[] memberInfos = declaringType.GetMembers();
+			foreach (MemberInfo memberInfo in memberInfos)
+			{
+				if ((memberInfo.Name != methodName) || (!(memberInfo is MethodInfo)))
+					continue;
+				MethodInfo methodInfo = memberInfo as MethodInfo;
+				if (((bindingFlags & BindingFlags.Public) != BindingFlags.Public) 
+					&& ((bindingFlags & BindingFlags.NonPublic) != BindingFlags.NonPublic))
+					return methodInfo;
+				else if (((bindingFlags & BindingFlags.Public) == BindingFlags.Public) && (methodInfo.IsPublic))
+					return methodInfo;
+				else if ((bindingFlags & BindingFlags.NonPublic) == BindingFlags.NonPublic)
+					return methodInfo;
+			}
+			return null;
+		}
+
+		/// <summary>
+		/// Workaround um die PropertyInfo von propertyName zu laden.
+		/// </summary>
+		/// <param name="propertyName">Name der Eigenschft die gefunden werden muss.</param>
+		/// <param name="declaringType">Typ in dem gesucht werden muss.</param>
+		/// <param name="bindingFlags">Ob private oder public gefunden werden soll</param>
+		/// <returns>PropertyInfo -> erlogreich gefunden. null -> nichts gefunden</returns>
+		private PropertyInfo GetPropertyInfo(string propertyName, Type declaringType, BindingFlags bindingFlags)
+		{
+			PropertyInfo[] propertyInfos = declaringType.GetProperties(bindingFlags);
+			foreach (PropertyInfo propertyInfo in propertyInfos)
+			{
+				if (propertyInfo.Name != propertyName)
+					continue;
+				if (((bindingFlags & BindingFlags.Public) != BindingFlags.Public)
+					&& ((bindingFlags & BindingFlags.NonPublic) != BindingFlags.NonPublic))
+					return propertyInfo;
+				else if (((bindingFlags & BindingFlags.Public) == BindingFlags.Public) && (propertyInfo.GetGetMethod().IsPublic))
+					return propertyInfo;
+				else if ((bindingFlags & BindingFlags.NonPublic) == BindingFlags.NonPublic)
+					return propertyInfo;
+			}
+			return null;
 		}
 
 		/// <summary>
