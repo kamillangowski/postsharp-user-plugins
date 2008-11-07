@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PlugIn xmlns="http://schemas.postsharp.org/1.0/configuration">
+	<TaskType Name="Torch.DesignByContract.CheckNonNull"	
+			  Implementation="Torch.DesignByContract.Weaving.Tasks.CheckNonNullTask, Torch.DesignByContract.Weaver">
+		<Dependency TaskType="CodeWeaver"/>
+	</TaskType>
+  <TaskType Name="Torch.DesignByContract.CheckNonEmpty"	
+			  Implementation="Torch.DesignByContract.Weaving.Tasks.CheckNonEmptyTask, Torch.DesignByContract.Weaver">
+		<Dependency TaskType="CodeWeaver"/>
+	</TaskType>
+  <TaskType Name="Torch.DesignByContract.CheckSingleton"	
+			  Implementation="Torch.DesignByContract.Weaving.Tasks.CheckSingletonTask, Torch.DesignByContract.Weaver">
+		<Dependency TaskType="CodeWeaver"/>
+	</TaskType>
+</PlugIn>
