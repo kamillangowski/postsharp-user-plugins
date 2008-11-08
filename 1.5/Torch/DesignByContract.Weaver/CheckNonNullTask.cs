@@ -1,12 +1,10 @@
-﻿using System;
-using PostSharp;
-using PostSharp.Extensibility;
+﻿using System.Collections.Generic;
+using System.Reflection;
+using PostSharp.CodeModel;
 using PostSharp.CodeWeaver;
 using PostSharp.Collections;
+using PostSharp.Extensibility;
 using PostSharp.Extensibility.Tasks;
-using System.Collections.Generic;
-using PostSharp.CodeModel;
-using System.Reflection;
 using Torch.DesignByContract.Weaving.Advices;
 
 namespace Torch.DesignByContract.Weaving.Tasks
@@ -18,20 +16,21 @@ namespace Torch.DesignByContract.Weaving.Tasks
         public void ProvideAdvices(Weaver codeWeaver)
         {
             // Gets the dictionary of custom attributes.
-            CustomAttributeDictionaryTask customAttributeDictionary =
-                CustomAttributeDictionaryTask.GetTask(this.Project);
+            AnnotationRepositoryTask customAttributeDictionary =
+                AnnotationRepositoryTask.GetTask(this.Project);
 
             // Requests an enumerator of all instances of our NonNullAttribute.
-            IEnumerator<ICustomAttributeInstance> customAttributeEnumerator =
-                customAttributeDictionary.GetCustomAttributesEnumerator(typeof(NonNullAttribute), true);
+            IEnumerator<IAnnotationInstance> customAttributeEnumerator =
+                customAttributeDictionary.GetAnnotationsOfType(typeof (NonNullAttribute), true);
             // Simulating a Set
-            IDictionary<MethodDefDeclaration, MethodDefDeclaration> methods = new Dictionary<MethodDefDeclaration, MethodDefDeclaration>();
+            IDictionary<MethodDefDeclaration, MethodDefDeclaration> methods =
+                new Dictionary<MethodDefDeclaration, MethodDefDeclaration>();
             // For each instance of our NonNullAttribute.
             while (customAttributeEnumerator.MoveNext())
             {
                 // Gets the parameters to which it applies.
                 ParameterDeclaration paramDef = customAttributeEnumerator.Current.TargetElement
-                                                 as ParameterDeclaration ;
+                                                as ParameterDeclaration;
 
                 if (paramDef != null)
                 {
@@ -46,7 +45,7 @@ namespace Torch.DesignByContract.Weaving.Tasks
                     {
                         if (!methods.ContainsKey(paramDef.Parent))
                         {
-                            codeWeaver.AddMethodLevelAdvice(new NonNullParameterAdvice(),
+                            codeWeaver.AddMethodLevelAdvice(new NonNullParameterAdvice(paramDef),
                                                             new Singleton<MethodDefDeclaration>(paramDef.Parent),
                                                             JoinPointKinds.BeforeMethodBody,
                                                             null);

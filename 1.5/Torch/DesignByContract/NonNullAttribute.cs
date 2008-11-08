@@ -4,22 +4,14 @@ using PostSharp.Extensibility;
 namespace Torch.DesignByContract
 {
     [AttributeUsage(
-        AttributeTargets.GenericParameter | AttributeTargets.Parameter | AttributeTargets.ReturnValue ,
+        AttributeTargets.GenericParameter | AttributeTargets.Parameter | AttributeTargets.ReturnValue,
         Inherited = true,
-        AllowMultiple = false)
-    ]
-    public class NonNullAttribute : Attribute, IRequirePostSharp
+        AllowMultiple = false)]
+    [MulticastAttributeUsage(MulticastTargets.Parameter | MulticastTargets.ReturnValue, AllowMultiple = false,
+        TargetMemberAttributes = MulticastAttributes.NonAbstract, Inheritance = MulticastInheritance.Strict,
+        PersistMetaData = true)]
+    [RequirePostSharp("Torch.DesignByContract", "Torch.DesignByContract.CheckNonNull")]
+    public class NonNullAttribute : MulticastAttribute
     {
-        #region IRequirePostSharp Members
-
-        public PostSharpRequirements GetPostSharpRequirements()
-        {
-            PostSharpRequirements requirements = new PostSharpRequirements();
-            requirements.PlugIns.Add("Torch.DesignByContract");
-            requirements.Tasks.Add("Torch.DesignByContract.CheckNonNull");
-            return requirements;
-        }
-
-        #endregion
     }
 }
