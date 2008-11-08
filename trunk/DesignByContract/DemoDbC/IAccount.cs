@@ -5,10 +5,10 @@ namespace DemoDbC
 {
     public interface IAccount
     {
-        [Dbc("amount>0", AttributeInheritance = MulticastInheritance.Strict)]
+        [Dbc("amount>0")]
         void Debit(decimal amount);
 
-        [Dbc("amount>0", AttributeInheritance = MulticastInheritance.Strict)]
+        [Dbc("amount>0")]
         void Credit(decimal amount);
 
         decimal Balance { get; }

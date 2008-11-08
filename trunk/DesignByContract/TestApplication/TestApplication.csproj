@@ -35,11 +35,13 @@
       <HintPath>C:\Programme\NUnit 2.4.6\bin\nunit.framework.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="PostSharp.Laos, Version=1.0.8.316, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="PostSharp.Laos, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <SpecificVersion>True</SpecificVersion>
+      <HintPath>$(POSTSHARP15_SRC)\Laos\PostSharp.Laos\bin\debug\PostSharp.Laos.dll</HintPath>
     </Reference>
-    <Reference Include="PostSharp.Public, Version=1.0.8.316, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="PostSharp.Public, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <SpecificVersion>True</SpecificVersion>
+      <HintPath>$(POSTSHARP15_SRC)\Laos\PostSharp.Laos\bin\debug\PostSharp.Public.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -97,7 +99,13 @@
       <Name>Aspect.DesignByContract</Name>
     </ProjectReference>
   </ItemGroup>
+  <PropertyGroup>
+    <_PostSharpTargets>$(POSTSHARP15_SRC)\Core\PostSharp.MSBuild\bin\debug\PostSharp-1.5.targets</_PostSharpTargets>
+    <DontImportPostSharp Condition="Exists('$(_PostSharpTargets)')">True</DontImportPostSharp>
+    <ReferencePath>$(POSTSHARP15_SRC)\Laos\PostSharp.Laos.Weaver\bin\debug</ReferencePath>
+  </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(_PostSharpTargets)" Condition="Exists('$(_PostSharpTargets)')"/>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
