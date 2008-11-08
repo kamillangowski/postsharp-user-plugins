@@ -33,6 +33,7 @@ using System.Reflection;
 using PostSharp.Extensibility;
 using Aspect.DesignByContract.Controller;
 using Aspect.DesignByContract.Enums;
+using System.Runtime.Serialization;
 
 namespace Aspect.DesignByContract.SubAspects
 {
@@ -40,13 +41,14 @@ namespace Aspect.DesignByContract.SubAspects
 	/// Aspekt für Lese bzw. Schreibzugriffe auf Felder
 	/// </summary>
 	[Serializable]
-	internal class FieldAccessAspect : OnFieldAccessAspect
+    internal class FieldAccessAspect : OnFieldAccessAspect, IDeserializationCallback
 	{
 
 		#region Interne Variablen (1) 
         // BUG
         // Bitte wieder entfernen dirty Hack
         private bool mStarted = false;
+        private string mAssemblyName = string.Empty;
 
 		/// <summary>
 		/// Für die Methode gültiges KontraktModel.
@@ -63,7 +65,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für das Feld auf das ein Lesezugriff ausgeführt wird.</param>
 		public override void OnGetValue(FieldAccessEventArgs eventArgs)
 		{
-            Initialize(eventArgs.FieldInfo);
+            Initialize(eventArgs.FieldInfo.DeclaringType.Assembly);
 			if (mFieldModel.DbcAccessType == AccessType.OnlyOnSet)
 			{
 				base.OnGetValue(eventArgs);
@@ -103,7 +105,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für das Feld auf das ein Schreibzugriff ausgeführt wird.</param>
 		public override void OnSetValue(FieldAccessEventArgs eventArgs)
 		{
-            Initialize(eventArgs.FieldInfo);
+            Initialize(eventArgs.FieldInfo.DeclaringType.Assembly);
 			if (mFieldModel.DbcAccessType == AccessType.OnlyOnGet)
 			{
 				base.OnSetValue(eventArgs);
@@ -164,8 +166,17 @@ namespace Aspect.DesignByContract.SubAspects
 		{
 			try
 			{
+                // Kontrakte an abstrakten Klassen oder Schnittstellen müssen nicht erzeugt werden.
+                if ((field.DeclaringType.IsAbstract)
+                    || (field.DeclaringType.IsInterface))
+                    return;
+
 				ExpressionController expressionController = new ExpressionController();
 				ExpressionModel expressionModel = null;
+
+                // Bug
+                // Hack bitte entfernen
+                mAssemblyName = field.DeclaringType.Assembly.FullName;
 
 				if ((mFieldModel.GetContract != null)
 					&& (!(string.IsNullOrEmpty(mFieldModel.GetContract.Contract))))
@@ -186,7 +197,7 @@ namespace Aspect.DesignByContract.SubAspects
 					mFieldModel.SetContract.ConvertedContract = expressionModel.ConvertedExpression;
 					mFieldModel.SetContract.GetOldValuesStatements = expressionModel.GetOldValueExpressions;
 					// Code erzeugen lassen
-					CodeController.Instance.AddContract(mFieldModel.SetContract, mFieldModel);
+                    CodeController.Instance.AddContract(mFieldModel.SetContract, mFieldModel);
 				}
 
 				base.CompileTimeInitialize(field);
@@ -222,7 +233,7 @@ namespace Aspect.DesignByContract.SubAspects
 				new Object[] { elementName, assemblyName, namespaceName, className, error });
 		}
 
-        private void Initialize(FieldInfo field)
+        private void Initialize(Assembly contractedAssembly)
         {
             if (mStarted)
                 return;
@@ -231,15 +242,18 @@ namespace Aspect.DesignByContract.SubAspects
             // Die Typen die zur Designzeit als generisch geladen wurden müssen
             // zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
             // Typen laden.
-            if (mFieldModel.GenericClassTypes == null)
-                mFieldModel.GenericClassTypes = field.DeclaringType.GetGenericArguments();
+
+            // Bug
+            // HACK BITTE WIEDER EINKOMMENTIEREN!!!
+            //if (mFieldModel.GenericClassTypes == null)
+            //    mFieldModel.GenericClassTypes = field.DeclaringType.GetGenericArguments();
 
 
             if (mFieldModel.ContractAssembly == null)
                 return;
 #if (DEBUG)
             ContractController.Instance.LoadContractAssembly(
-                field.DeclaringType.Assembly,
+                contractedAssembly,
                 mFieldModel.ContractClassName,
                 mFieldModel.ContractAssembly,
                 mFieldModel.PdbFile,
@@ -258,6 +272,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="field">Feld Element</param>
 		public override void RuntimeInitialize(FieldInfo field)
 		{
+            Initialize(field.DeclaringType.Assembly);
             return;
 //            // Die Typen die zur Designzeit als generisch geladen wurden müssen
 //            // zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
@@ -286,5 +301,28 @@ namespace Aspect.DesignByContract.SubAspects
 
         #endregion Methoden 
 
-	}
+	
+        #region IDeserializationCallback Member
+
+        /// <summary>
+        /// Bug
+        /// </summary>
+        /// <param name="sender"></param>
+        public void OnDeserialization(object sender)
+        {
+#if (DEBUG)
+            Assembly[] appAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+            for (int i = 0; i < appAssemblies.Length; i++)
+            {
+                if (appAssemblies[i].FullName == mAssemblyName)
+                    Initialize(appAssemblies[i]);
+            }
+#else
+            Initialize(null);
+#endif
+        }
+
+        #endregion
+    }
 }
