@@ -33,6 +33,7 @@ using Aspect.DesignByContract.MessageSources;
 using PostSharp.Extensibility;
 using Aspect.DesignByContract.Controller;
 using Aspect.DesignByContract.Enums;
+using System.Runtime.Serialization;
 
 namespace Aspect.DesignByContract.SubAspects
 {
@@ -40,11 +41,13 @@ namespace Aspect.DesignByContract.SubAspects
  	/// Aspekt für Ein bzw. Austrittsprüfungen auf Methoden.
 	/// </summary>
 	[Serializable]
-	internal class MethodBoundaryAspect : OnMethodBoundaryAspect
+    internal class MethodBoundaryAspect : OnMethodBoundaryAspect, IDeserializationCallback
 	{
         // BUG
         // Bitte wieder entfernen dirty Hack
         private bool mStarted = false;
+        private string mAssemblyName = string.Empty;
+
 		#region Interne Variablen (2) 
 
 		/// <summary>
@@ -67,11 +70,11 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="eventArgs">FieldAccessEventArgs für die Methode die aufgerufen wurde.</param>
 		public override void OnEntry(MethodExecutionEventArgs eventArgs)
 		{
-            if (mContractModel.ContractAssembly == null)
-                return;
+            // Bug
+            // Hacking Code bitte entfernen
+            Initialize(eventArgs.Method.DeclaringType.Assembly);
 
-            Initialize(eventArgs.Method);
-			// Die Typen die zur Designzeit als generisch geladen wurden müssen
+            // Die Typen die zur Designzeit als generisch geladen wurden müssen
 			// zur Laufzeit als konkrete Typen definiert werden. Diese konktreten
 			// Typen laden. Es müssen die Typen immer geladen werden, da es sonst
 			// bei verschiedene instanzierungen um verschiedene Typen handeln kann.
@@ -152,6 +155,15 @@ namespace Aspect.DesignByContract.SubAspects
 		{
 			try
 			{
+                // Kontrakte an abstrakten Klassen oder Schnittstellen müssen nicht erzeugt werden.
+                if ((method.DeclaringType.IsAbstract)
+                    || (method.DeclaringType.IsInterface))
+                    return;
+
+                // Bug
+                // Hack bitte entfernen
+                mAssemblyName = method.DeclaringType.Assembly.FullName;
+
 				ExpressionController expressionController = new ExpressionController();
 				ExpressionModel expressionModel = null;
 
@@ -175,7 +187,7 @@ namespace Aspect.DesignByContract.SubAspects
 					mContractModel.EnsureContract.ConvertedContract = expressionModel.ConvertedExpression;
 					mContractModel.EnsureContract.GetOldValuesStatements = expressionModel.GetOldValueExpressions;
 					// Code erzeugen lassen
-					CodeController.Instance.AddContract(mContractModel.EnsureContract, mContractModel);
+                    CodeController.Instance.AddContract(mContractModel.EnsureContract, mContractModel);
 				}
 
 				base.CompileTimeInitialize(method);
@@ -211,16 +223,17 @@ namespace Aspect.DesignByContract.SubAspects
 				new Object[] { elementName, assemblyName, namespaceName, className, error });
 		}
 
-        private void Initialize(MethodBase method)
+        private void Initialize(Assembly contractedAssembly)
         {
             if (mStarted)
                 return;
             mStarted = true;
             if (mContractModel.ContractAssembly == null)
                 return;
+
 #if (DEBUG)
             ContractController.Instance.LoadContractAssembly(
-                method.DeclaringType.Assembly,
+                contractedAssembly,
                 mContractModel.ContractClassName,
                 mContractModel.ContractAssembly,
                 mContractModel.PdbFile,
@@ -239,6 +252,7 @@ namespace Aspect.DesignByContract.SubAspects
 		/// <param name="field">Methoden Element</param>
 		public override void RuntimeInitialize(MethodBase method)
 		{
+            Initialize(method.DeclaringType.Assembly);
             return;
 //            if (mContractModel.ContractAssembly == null)
 //                return;
@@ -260,5 +274,28 @@ namespace Aspect.DesignByContract.SubAspects
 
 		#endregion Methoden 
 
-	}
+	
+        #region IDeserializationCallback Member
+
+        /// <summary>
+        /// Bug...
+        /// </summary>
+        /// <param name="sender"></param>
+        public void OnDeserialization(object sender)
+        {
+#if (DEBUG)
+   			Assembly[] appAssemblies = AppDomain.CurrentDomain.GetAssemblies();
+
+			for (int i = 0; i < appAssemblies.Length; i++)
+            {
+                if (appAssemblies[i].FullName == mAssemblyName)
+                    Initialize(appAssemblies[i]);
+            }
+#else
+            Initialize(null);
+#endif
+        }
+
+        #endregion
+    }
 }
