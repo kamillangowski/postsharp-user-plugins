@@ -11,7 +11,7 @@ namespace TestApplicationLibaryPostSharp1_5
 	{
 		int TestProperty { get; set; }
 
-		[Dbc("test==true", AttributeInheritance = MulticastInheritance.Strict)]
+		[Dbc("test==true")]
 		bool TestMethod(bool test);
 	}
 }

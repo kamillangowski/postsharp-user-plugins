@@ -20,7 +20,7 @@ namespace TestApplicationLibaryPostSharp1_5
 {
 	public abstract class AbstractClass
 	{
-        [Dbc("test>100", AttributeInheritance = MulticastInheritance.Strict)]
+        [Dbc("test>100")]
         public abstract int TestMethod(int test);
 	}
 }

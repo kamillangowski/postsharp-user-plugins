@@ -43,7 +43,8 @@ namespace Aspect.DesignByContract
 	/// </summary>
 	[Serializable]
 	[AttributeUsage(AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property)]
-	[MulticastAttributeUsage(MulticastTargets.Field | MulticastTargets.Method | MulticastTargets.Property)]
+	[MulticastAttributeUsage(MulticastTargets.Field | MulticastTargets.Method | MulticastTargets.Property,
+        Inheritance = MulticastInheritance.Multicast, TargetMemberAttributes = MulticastAttributes.NonAbstract)]
 	public class Dbc : CompoundAspect
 	{
 
