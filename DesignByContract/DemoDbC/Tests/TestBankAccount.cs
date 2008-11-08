@@ -26,6 +26,8 @@ namespace DemoDbC.Tests
         public void TestGoToNegative()
         {
             BankAccount account = new BankAccount();
+            // If you don't take the Limit down you will get a ContractException by -> balance>=Limit of field balance
+            account.Limit = -5;
             account.Debit(5);
             Assert.AreEqual(account.Balance, -5);
         }
