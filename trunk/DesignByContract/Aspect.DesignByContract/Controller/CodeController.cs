@@ -611,16 +611,26 @@ namespace Aspect.DesignByContract.Controller
 			Type[] assemblyTypes = contractedAssembly.GetTypes();
 			foreach (Type assemblyType in assemblyTypes)
 			{
+                if ((assemblyType.IsInterface) || (assemblyType.IsAbstract))
+                    continue;
                 attributeCount += GetTypeCount(assemblyType, false, false);
                 foreach (Type interfaceType in assemblyType.GetInterfaces())
                 {
-                    attributeCount += GetTypeCount(interfaceType, true, false);
+                    if (interfaceType.Assembly.FullName == assemblyType.Assembly.FullName)
+                        attributeCount += GetTypeCount(interfaceType, false, false);
+                    else
+                        attributeCount += GetTypeCount(interfaceType, true, false);
                 }
                 Type baseType = assemblyType.BaseType;
                 while (baseType != null)
                 {
                     if (baseType.IsAbstract)
-                        attributeCount += GetTypeCount(baseType, true, true);
+                    {
+                        if (baseType.Assembly.FullName == assemblyType.Assembly.FullName)
+                            attributeCount += GetTypeCount(baseType, false, true);
+                        else
+                            attributeCount += GetTypeCount(baseType, true, true);
+                    }
                     baseType = baseType.BaseType;
                 }
 			}
