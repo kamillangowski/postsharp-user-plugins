@@ -1,14 +1,13 @@
-﻿using System;
-using PostSharp.CodeWeaver;
-using PostSharp.CodeModel;
-using PostSharp.Collections;
 using System.Reflection;
+using PostSharp.CodeModel;
+using PostSharp.CodeWeaver;
+using PostSharp.Collections;
 
 namespace Torch.DesignByContract.Weaving.Advices
 {
     public class SingletonAccessorAdvice : IAdvice
     {
-        private TypeDefDeclaration m_type;
+        private readonly TypeDefDeclaration m_type;
 
         public SingletonAccessorAdvice(TypeDefDeclaration typeDef)
         {
@@ -27,12 +26,13 @@ namespace Torch.DesignByContract.Weaving.Advices
             return true;
         }
 
-        public void Weave(WeavingContext context, PostSharp.CodeModel.InstructionBlock block)
+        public void Weave(WeavingContext context, InstructionBlock block)
         {
             TypeDefDeclaration typeDef = m_type;
             // Declare the static field
             FieldDefDeclaration fieldDef = new FieldDefDeclaration();
-            fieldDef.Attributes = FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.NotSerialized | FieldAttributes.InitOnly;
+            fieldDef.Attributes = FieldAttributes.Private | FieldAttributes.Static | FieldAttributes.NotSerialized |
+                                  FieldAttributes.InitOnly;
             fieldDef.Name = "s_instance";
             fieldDef.FieldType = typeDef;
 
@@ -49,7 +49,8 @@ namespace Torch.DesignByContract.Weaving.Advices
 
             MethodDefDeclaration methodDef = new MethodDefDeclaration();
             methodDef.Name = "get_Instance";
-            methodDef.Attributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static | MethodAttributes.SpecialName;
+            methodDef.Attributes = MethodAttributes.Public | MethodAttributes.HideBySig | MethodAttributes.Static |
+                                   MethodAttributes.SpecialName;
             methodDef.CallingConvention = CallingConvention.Default;
 
             typeDef.Methods.Add(methodDef);
@@ -70,12 +71,12 @@ namespace Torch.DesignByContract.Weaving.Advices
 
             //throw new NotFiniteNumberException();
             InstructionSequence sequence = methodDef.MethodBody.CreateInstructionSequence();
-            methodDef.MethodBody.RootInstructionBlock.AddInstructionSequence(sequence, NodePosition.After , null);
+            methodDef.MethodBody.RootInstructionBlock.AddInstructionSequence(sequence, NodePosition.After, null);
             context.InstructionWriter.AttachInstructionSequence(sequence);
 
             context.InstructionWriter.EmitInstructionField(OpCodeNumber.Ldsfld, typeDef.Fields.GetByName("s_instance"));
             context.InstructionWriter.EmitInstruction(OpCodeNumber.Ret);
-            
+
             context.InstructionWriter.DetachInstructionSequence();
 
             // code for the static constructor
@@ -87,7 +88,9 @@ namespace Torch.DesignByContract.Weaving.Advices
             context.InstructionWriter.DetachInstructionSequence();
 
             // Change visibility to the constructor
-            typeDef.Methods.GetOneByName(".ctor").Attributes = MethodAttributes.Private | MethodAttributes.HideBySig | MethodAttributes.SpecialName | MethodAttributes.RTSpecialName;
+            typeDef.Methods.GetOneByName(".ctor").Attributes = MethodAttributes.Private | MethodAttributes.HideBySig |
+                                                               MethodAttributes.SpecialName |
+                                                               MethodAttributes.RTSpecialName;
         }
 
         #endregion

@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual C# Express 2008
+# Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesignByContract", "DesignByContract\DesignByContract.csproj", "{203AEF24-74BE-4EB5-92CC-50427502C1D0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesignByContract.Weaver", "DesignByContract.Weaver\DesignByContract.Weaver.csproj", "{6BADCD67-D169-484D-B3CF-1F4F4107542C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DesignByContract.Demo", "DesignByContract.Demo\DesignByContract.Demo.csproj", "{B1966003-4A7D-4977-BD1F-C38F93BA3CAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +21,10 @@ Global
 		{6BADCD67-D169-484D-B3CF-1F4F4107542C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BADCD67-D169-484D-B3CF-1F4F4107542C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BADCD67-D169-484D-B3CF-1F4F4107542C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1966003-4A7D-4977-BD1F-C38F93BA3CAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1966003-4A7D-4977-BD1F-C38F93BA3CAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1966003-4A7D-4977-BD1F-C38F93BA3CAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1966003-4A7D-4977-BD1F-C38F93BA3CAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

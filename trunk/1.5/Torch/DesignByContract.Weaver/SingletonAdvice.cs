@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using PostSharp.CodeWeaver;
+using System;
 using PostSharp.CodeModel;
+using PostSharp.CodeWeaver;
 using PostSharp.Collections;
 
 namespace Torch.DesignByContract.Weaving.Advices
 {
     public class SingletonAdvice : IAdvice
     {
-        private TypeDefDeclaration m_type;
+        private readonly TypeDefDeclaration m_type;
 
         public SingletonAdvice(TypeDefDeclaration typeDef)
         {
@@ -30,14 +29,17 @@ namespace Torch.DesignByContract.Weaving.Advices
         public void Weave(WeavingContext context, InstructionBlock block)
         {
             InstructionSequence sequence = null;
-            
+
             sequence = context.Method.MethodBody.CreateInstructionSequence();
             block.AddInstructionSequence(sequence, NodePosition.After, null);
             context.InstructionWriter.AttachInstructionSequence(sequence);
-            
-            context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, context.Method.Module.FindMethod(m_type.Methods.GetOneByName("get_Instance").GetReflectionWrapper(new Type[]{},new Type[]{}),BindingOptions.Default));
+
+            context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call,
+                                                            context.Method.Module.FindMethod(
+                                                                m_type.Methods.GetOneByName("get_Instance").
+                                                                    GetReflectionWrapper(new Type[] {}, new Type[] {}),
+                                                                BindingOptions.Default));
             context.InstructionWriter.DetachInstructionSequence();
-            
         }
 
         #endregion

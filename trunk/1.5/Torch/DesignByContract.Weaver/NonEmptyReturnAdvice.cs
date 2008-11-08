@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+using System;
+using PostSharp.CodeModel;
 using PostSharp.CodeWeaver;
 using PostSharp.Collections;
-using PostSharp.CodeModel;
 
 namespace Torch.DesignByContract.Weaving.Advices
 {
-    class NonEmptyReturnAdvice : IAdvice
+    internal class NonEmptyReturnAdvice : IAdvice
     {
         #region IAdvice Members
 
@@ -27,7 +26,8 @@ namespace Torch.DesignByContract.Weaving.Advices
             InstructionWriter writer = context.InstructionWriter;
             writer.AttachInstructionSequence(sequence);
 
-            IMethod isNullOrEmpty = context.Method.Module.FindMethod(typeof(string).GetMethod("IsNullOrEmpty"), BindingOptions.Default);
+            IMethod isNullOrEmpty = context.Method.Module.FindMethod(typeof (string).GetMethod("IsNullOrEmpty"),
+                                                                     BindingOptions.Default);
 
             context.InstructionWriter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc, context.ReturnValueVariable);
             context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, isNullOrEmpty);
@@ -35,8 +35,17 @@ namespace Torch.DesignByContract.Weaving.Advices
             InstructionSequence nextSequence = context.Method.MethodBody.CreateInstructionSequence();
 
             context.InstructionWriter.EmitBranchingInstruction(OpCodeNumber.Brfalse_S, nextSequence);
-            context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, (LiteralString)"Return value is null or empty.");
-            context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Newobj, context.Method.Module.FindMethod(typeof(ArgumentException).GetConstructor(new Type[] { typeof(string) }), BindingOptions.Default));
+            context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, "Return value is null or empty.");
+            context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Newobj,
+                                                            context.Method.Module.FindMethod(
+                                                                typeof (ArgumentException).GetConstructor(new[]
+                                                                                                              {
+                                                                                                                  typeof
+                                                                                                                      (
+                                                                                                                      string
+                                                                                                                      )
+                                                                                                              }),
+                                                                BindingOptions.Default));
             context.InstructionWriter.EmitInstruction(OpCodeNumber.Throw);
 
             block.AddInstructionSequence(nextSequence, NodePosition.After, sequence);

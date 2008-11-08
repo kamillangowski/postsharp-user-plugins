@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("DesignByContract.Weaver")]
+[assembly: AssemblyTitle("DesignByContract.Demo")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("SIF America")]
-[assembly: AssemblyProduct("DesignByContract.Weaver")]
-[assembly: AssemblyCopyright("Copyright © SIF America 2008")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("DesignByContract.Demo")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 
-[assembly: Guid("88ee2941-288f-4214-ac39-e9f323c87732")]
+[assembly: Guid("e338b0c1-32be-41f0-8d14-a7606a4e91af")]
 
 // Version information for an assembly consists of the following four values:
 //
