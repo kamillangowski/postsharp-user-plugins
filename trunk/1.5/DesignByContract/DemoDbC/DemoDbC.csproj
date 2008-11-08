@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BankAccount.cs" />
+    <Compile Include="BuggyAccount.cs" />
     <Compile Include="Cashbox.cs" />
     <Compile Include="IAccount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -73,6 +74,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="Tests\TestBuggyAccount.cs" />
     <Compile Include="Tests\TestCashbox.cs" />
     <Compile Include="Tests\TestBankAccount.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
