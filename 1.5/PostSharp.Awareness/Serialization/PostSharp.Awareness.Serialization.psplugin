@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<PlugIn xmlns="http://schemas.postsharp.org/1.0/configuration">
+  <TaskType Name="PostSharp.Awareness.Serialization" Implementation="PostSharp.Awareness.Serialization.SerializationAwarenessTask, PostSharp.Awareness.Serialization" >
+    
+  </TaskType>
+    
+</PlugIn>
+
