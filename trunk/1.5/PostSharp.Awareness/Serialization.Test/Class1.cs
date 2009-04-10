@@ -15,6 +15,7 @@ namespace Serialization.Test
         public void TestA()
         {
             A a = RoundtripSerialize( new A {a = 1} );
+            Assert.AreEqual( 1, a.InitializeCount );
             Assert.AreEqual( 1, a.a );
             TestList( Post.Cast<A, IList<Guid>>( a ), Guid.NewGuid(), Guid.NewGuid(), Guid.Empty );
         }
@@ -23,6 +24,7 @@ namespace Serialization.Test
         public void TestB()
         {
             B<decimal> b = RoundtripSerialize( new B<decimal> {a = 1, b = 2} );
+            Assert.AreEqual( 2, b.InitializeCount);
             Assert.AreEqual( 1, b.a );
             Assert.AreEqual( 2, b.b );
             TestList( Post.Cast<B<decimal>, IList<string>>( b ), "a", "b", "c" );
@@ -32,6 +34,7 @@ namespace Serialization.Test
         public void TestC()
         {
             C<decimal, string> c = RoundtripSerialize( new C<decimal, string> {c = 3} );
+            Assert.AreEqual(1, c.InitializeCount);
             Assert.AreEqual( 3, c.c );
             Assert.AreEqual(1, c.a);
             TestList( Post.Cast<C<decimal, string>, IList<int>>( c ), 1, 2, 3 );
@@ -60,9 +63,14 @@ namespace Serialization.Test
 
         [DataContract]
         [MyCompositionAspect( InterfaceType = typeof(IList<Guid>), ImplementationType = typeof(List<Guid>) )]
-        private class A
+        private class A : IInitializeCounter
         {
             [DataMember] public int a;
+
+            public int InitializeCount
+            {
+                get; set;
+            }
         }
 
         [DataContract]
@@ -74,7 +82,7 @@ namespace Serialization.Test
 
         [DataContract]
         [MyCompositionAspect( InterfaceType = typeof(IList<int>), ImplementationType = typeof(List<int>) )]
-        private class C<T1, T2> 
+        private class C<T1, T2>  : IInitializeCounter
         {
             [DataMember] public T1 c;
             
@@ -85,7 +93,19 @@ namespace Serialization.Test
             {
                 this.a = 1;
             }
+
+            public int InitializeCount
+            {
+                get;
+                set;
+            }
         }
+    }
+
+    interface IInitializeCounter
+    {
+        int InitializeCount { get; set;  }
+        
     }
 
     [Serializable]
@@ -97,6 +117,9 @@ namespace Serialization.Test
 
         public override object CreateImplementationObject( InstanceBoundLaosEventArgs eventArgs )
         {
+            IInitializeCounter initializeCounter = (IInitializeCounter) eventArgs.Instance;
+            initializeCounter.InitializeCount = initializeCounter.InitializeCount + 1;
+            
             return Activator.CreateInstance( ImplementationType );
         }
 
