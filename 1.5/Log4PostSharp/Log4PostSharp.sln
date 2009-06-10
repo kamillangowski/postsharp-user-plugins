@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp", "Log4PostSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Weaver", "Log4PostSharp.Weaver\Log4PostSharp.Weaver.csproj", "{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Test", "Log4PostSharp.Test\Log4PostSharp.Test.csproj", "{ED16B3ED-D807-43DB-AEBA-EAF89604B418}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.TestApp", "Log4PostSharp.TestApp\Log4PostSharp.TestApp.csproj", "{ED16B3ED-D807-43DB-AEBA-EAF89604B418}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

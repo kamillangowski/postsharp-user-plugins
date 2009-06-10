@@ -7,8 +7,8 @@
     <ProjectGuid>{ED16B3ED-D807-43DB-AEBA-EAF89604B418}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Log4PostSharp.Test</RootNamespace>
-    <AssemblyName>Log4PostSharp.Test</AssemblyName>
+    <RootNamespace>Log4PostSharp.TestApp</RootNamespace>
+    <AssemblyName>Log4PostSharp.TestApp</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -69,7 +69,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Log4PostSharp.Test.psproj" />
+    <None Include="Log4PostSharp.TestApp.psproj" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
