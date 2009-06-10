@@ -29,60 +29,68 @@ using System;
 using PostSharp.CodeModel;
 using PostSharp.CodeWeaver;
 
-namespace Log4PostSharp.Weaver {
-	/// <summary>
-	/// Represents the token which expands to the value of the method parameter.
-	/// </summary>
-	/// <remarks>
-	/// <para>Since values of method parameters are known only at run-time, this is dynamic token.</para>
-	/// </remarks>
-	public class ParameterValueToken : IMessageToken {
-		#region Private Fields
+namespace Log4PostSharp.Weaver
+{
+  /// <summary>
+  /// Represents the token which expands to the value of the method parameter.
+  /// </summary>
+  /// <remarks>
+  /// <para>Since values of method parameters are known only at run-time, this is dynamic token.</para>
+  /// </remarks>
+  public class ParameterValueToken : IMessageToken
+  {
+    #region Private Fields
 
-		/// <summary>
-		/// Parameter whose value this token expands to.
-		/// </summary>
-		private readonly ParameterDeclaration parameter;
+    /// <summary>
+    /// Parameter whose value this token expands to.
+    /// </summary>
+    private readonly ParameterDeclaration parameter;
 
-		#endregion
+    #endregion
 
-		#region Public Constructors
+    #region Public Constructors
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ParameterValueToken"/> class
-		/// with the specified parameter.
-		/// </summary>
-		/// <param name="parameter">Parameter whose value the token expands to.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="parameter"/> is <see langword="null"/>.</exception>
-		public ParameterValueToken(ParameterDeclaration parameter) {
-			if (parameter == null) {
-				throw new ArgumentNullException("parameter");
-			}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ParameterValueToken"/> class
+    /// with the specified parameter.
+    /// </summary>
+    /// <param name="parameter">Parameter whose value the token expands to.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="parameter"/> is <see langword="null"/>.</exception>
+    public ParameterValueToken(ParameterDeclaration parameter)
+    {
+      if (parameter == null)
+      {
+        throw new ArgumentNullException("parameter");
+      }
 
-			this.parameter = parameter;
-		}
+      this.parameter = parameter;
+    }
 
-		#endregion
+    #endregion
 
-		#region IMessageToken Members
+    #region IMessageToken Members
 
-		public bool IsStatic {
-			get { return false; }
-		}
+    public bool IsStatic
+    {
+      get { return false; }
+    }
 
-		public string Text {
-			get { throw new NotSupportedException(); }
-		}
+    public string Text
+    {
+      get { throw new NotSupportedException(); }
+    }
 
-		public void Emit(WeavingContext context) {
-			if (context == null) {
-				throw new ArgumentNullException("context");
-			}
+    public void Emit(WeavingContext context)
+    {
+      if (context == null)
+      {
+        throw new ArgumentNullException("context");
+      }
 
-			context.InstructionWriter.EmitInstructionParameter(OpCodeNumber.Ldarg, this.parameter);
-			context.WeavingHelper.ToObject(this.parameter.ParameterType, context.InstructionWriter);
-		}
+      context.InstructionWriter.EmitInstructionParameter(OpCodeNumber.Ldarg, this.parameter);
+      context.WeavingHelper.ToObject(this.parameter.ParameterType, context.InstructionWriter);
+    }
 
-		#endregion
-	}
+    #endregion
+  }
 }

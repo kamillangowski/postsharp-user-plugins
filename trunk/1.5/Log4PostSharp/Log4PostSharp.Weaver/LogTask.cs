@@ -40,308 +40,338 @@ using PostSharp.Collections;
 using PostSharp.Extensibility;
 using PostSharp.Extensibility.Tasks;
 
-namespace Log4PostSharp.Weaver {
-	public class LogTask : Task, IAdviceProvider {
-		#region Private Fields
+namespace Log4PostSharp.Weaver
+{
+  public class LogTask : Task, IAdviceProvider
+  {
+    #region Private Fields
 
-		/// <summary>
-		/// System.Boolean type.
-		/// </summary>
-		private ITypeSignature boolType;
+    /// <summary>
+    /// System.Boolean type.
+    /// </summary>
+    private ITypeSignature boolType;
 
-		/// <summary>
-		/// System.Object type.
-		/// </summary>
-		private ITypeSignature objectType;
+    /// <summary>
+    /// System.Object type.
+    /// </summary>
+    private ITypeSignature objectType;
 
-		/// <summary>
-		/// System.Globalization.CultureInfo.InvariantCulture getter.
-		/// </summary>
-		private IMethod invariantCultureGetter;
+    /// <summary>
+    /// System.Globalization.CultureInfo.InvariantCulture getter.
+    /// </summary>
+    private IMethod invariantCultureGetter;
 
-		/// <summary>
-		/// log4net.LogManager.GetLogger(System.Type) method.
-		/// </summary>
-		private IMethod getLoggerMethod;
+    /// <summary>
+    /// log4net.LogManager.GetLogger(System.Type) method.
+    /// </summary>
+    private IMethod getLoggerMethod;
 
-		/// <summary>
-		/// log4net.ILog type.
-		/// </summary>
-		private ITypeSignature ilogType;
+    /// <summary>
+    /// log4net.ILog type.
+    /// </summary>
+    private ITypeSignature ilogType;
 
-		/// <summary>
-		/// System.Runtime.CompilerServices.CompilerGeneratedAttribute type.
-		/// </summary>
-		private IType compilerGeneratedAttributeType;
+    /// <summary>
+    /// System.Runtime.CompilerServices.CompilerGeneratedAttribute type.
+    /// </summary>
+    private IType compilerGeneratedAttributeType;
 
-		/// <summary>
-		/// Collection of support items for different log levels.
-		/// </summary>
-		private readonly Dictionary<LogLevel, LogLevelSupportItem> levelSupportItems = new Dictionary<LogLevel, LogLevelSupportItem>();
+    /// <summary>
+    /// Collection of support items for different log levels.
+    /// </summary>
+    private readonly Dictionary<LogLevel, LogLevelSupportItem> levelSupportItems = new Dictionary<LogLevel, LogLevelSupportItem>();
 
-		/// <summary>
-		/// Collection of per type logging information.
-		/// </summary>
-		private readonly Dictionary<TypeDefDeclaration, PerTypeLoggingData> perTypeLoggingDatas = new Dictionary<TypeDefDeclaration, PerTypeLoggingData>();
+    /// <summary>
+    /// Collection of per type logging information.
+    /// </summary>
+    private readonly Dictionary<TypeDefDeclaration, PerTypeLoggingData> perTypeLoggingDatas = new Dictionary<TypeDefDeclaration, PerTypeLoggingData>();
 
-		#endregion
+    #endregion
 
-		#region Private Methods
+    #region Private Methods
 
-		/// <summary>
-		/// Creates a private static readonly field.
-		/// </summary>
-		/// <param name="name">Name of the field.</param>
-		/// <param name="type">Type of the field.</param>
-		/// <returns>Private static readonly field of the specified type.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="type"/> is <see langword="null"/>.</exception>
-		private static FieldDefDeclaration CreateField(string name, ITypeSignature type) {
-			if (name == null) {
-				throw new ArgumentNullException("name");
-			}
-			if (type == null) {
-				throw new ArgumentNullException("type");
-			}
+    /// <summary>
+    /// Creates a private static readonly field.
+    /// </summary>
+    /// <param name="name">Name of the field.</param>
+    /// <param name="type">Type of the field.</param>
+    /// <returns>Private static readonly field of the specified type.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="name"/> or <paramref name="type"/> is <see langword="null"/>.</exception>
+    private static FieldDefDeclaration CreateField(string name, ITypeSignature type)
+    {
+      if (name == null)
+      {
+        throw new ArgumentNullException("name");
+      }
+      if (type == null)
+      {
+        throw new ArgumentNullException("type");
+      }
 
-			FieldDefDeclaration field = new FieldDefDeclaration();
-			field.Attributes = FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static;
-			field.Name = name;
-			field.FieldType = type;
-			return field;
-		}
+      FieldDefDeclaration field = new FieldDefDeclaration();
+      field.Attributes = FieldAttributes.InitOnly | FieldAttributes.Private | FieldAttributes.Static;
+      field.Name = name;
+      field.FieldType = type;
+      return field;
+    }
 
-		/// <summary>
-		/// Creates <see cref="LogLevelSupportItem"/> for the specified logging level.
-		/// </summary>
-		/// <param name="memberNamePart">"Debug", "Info", "Warn", "Error" or "Fatal" depending on the log level the item is to be created for.</param>
-		/// <returns><see cref="LogLevelSupportItem"/> for the specified level.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="memberNamePart"/> is <see langword="null"/>.</exception>
-		private LogLevelSupportItem CreateSupportItem(string memberNamePart) {
-			if (memberNamePart == null) {
-				throw new ArgumentNullException("memberNamePart");
-			}
+    /// <summary>
+    /// Creates <see cref="LogLevelSupportItem"/> for the specified logging level.
+    /// </summary>
+    /// <param name="memberNamePart">"Debug", "Info", "Warn", "Error" or "Fatal" depending on the log level the item is to be created for.</param>
+    /// <returns><see cref="LogLevelSupportItem"/> for the specified level.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="memberNamePart"/> is <see langword="null"/>.</exception>
+    private LogLevelSupportItem CreateSupportItem(string memberNamePart)
+    {
+      if (memberNamePart == null)
+      {
+        throw new ArgumentNullException("memberNamePart");
+      }
 
-			// Target module.
-			ModuleDeclaration module = this.Project.Module;
+      // Target module.
+      ModuleDeclaration module = this.Project.Module;
 
-			string isLoggingEnabledGetterName = string.Format(CultureInfo.InvariantCulture, "Is{0}Enabled", memberNamePart);
-			string logStringMethodName = memberNamePart;
-			string logStringExceptionMethodName = memberNamePart;
-			string logCultureStringArgsMethodName = memberNamePart + "Format";
-			IMethod isLoggingEnabledGetter = module.FindMethod(typeof (ILog).GetProperty(isLoggingEnabledGetterName).GetGetMethod(), BindingOptions.Default);
-			IMethod logStringMethod = module.FindMethod(typeof (ILog).GetMethod(logStringMethodName, new Type[] {typeof (string)}), BindingOptions.Default);
-			IMethod logStringExceptionMethod = module.FindMethod(typeof (ILog).GetMethod(logStringExceptionMethodName, new Type[] {typeof (string), typeof (Exception)}), BindingOptions.Default);
-			IMethod logCultureStringArgsMethod = module.FindMethod(typeof (ILog).GetMethod(logCultureStringArgsMethodName, new Type[] {typeof (IFormatProvider), typeof (string), typeof (object[])}), BindingOptions.Default);
+      string isLoggingEnabledGetterName = string.Format(CultureInfo.InvariantCulture, "Is{0}Enabled", memberNamePart);
+      string logStringMethodName = memberNamePart;
+      string logStringExceptionMethodName = memberNamePart;
+      string logCultureStringArgsMethodName = memberNamePart + "Format";
+      IMethod isLoggingEnabledGetter = module.FindMethod(typeof(ILog).GetProperty(isLoggingEnabledGetterName).GetGetMethod(), BindingOptions.Default);
+      IMethod logStringMethod = module.FindMethod(typeof(ILog).GetMethod(logStringMethodName, new Type[] { typeof(string) }), BindingOptions.Default);
+      IMethod logStringExceptionMethod = module.FindMethod(typeof(ILog).GetMethod(logStringExceptionMethodName, new Type[] { typeof(string), typeof(Exception) }), BindingOptions.Default);
+      IMethod logCultureStringArgsMethod = module.FindMethod(typeof(ILog).GetMethod(logCultureStringArgsMethodName, new Type[] { typeof(IFormatProvider), typeof(string), typeof(object[]) }), BindingOptions.Default);
 
-			return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod, logCultureStringArgsMethod);
-		}
+      return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod, logCultureStringArgsMethod);
+    }
 
-		#endregion
+    #endregion
 
-		#region Internal Properties
+    #region Internal Properties
 
-		/// <summary>
-		/// Gets the System.Object type.
-		/// </summary>
-		internal ITypeSignature ObjectType {
-			get { return this.objectType; }
-		}
+    /// <summary>
+    /// Gets the System.Object type.
+    /// </summary>
+    internal ITypeSignature ObjectType
+    {
+      get { return this.objectType; }
+    }
 
-		/// <summary>
-		/// Gets the System.Globalization.CultureInfo.InvariantCulture getter.
-		/// </summary>
-		internal IMethod InvariantCultureGetter {
-			get { return this.invariantCultureGetter; }
-		}
+    /// <summary>
+    /// Gets the System.Globalization.CultureInfo.InvariantCulture getter.
+    /// </summary>
+    internal IMethod InvariantCultureGetter
+    {
+      get { return this.invariantCultureGetter; }
+    }
 
-		/// <summary>
-		/// Gets the log4net.LogManager.GetLogger(System.Type) method.
-		/// </summary>
-		internal IMethod GetLoggerMethod {
-			get { return this.getLoggerMethod; }
-		}
+    /// <summary>
+    /// Gets the log4net.LogManager.GetLogger(System.Type) method.
+    /// </summary>
+    internal IMethod GetLoggerMethod
+    {
+      get { return this.getLoggerMethod; }
+    }
 
-		/// <summary>
-		/// Gets the log4net.ILog type.
-		/// </summary>
-		internal ITypeSignature IlogType {
-			get { return this.ilogType; }
-		}
+    /// <summary>
+    /// Gets the log4net.ILog type.
+    /// </summary>
+    internal ITypeSignature IlogType
+    {
+      get { return this.ilogType; }
+    }
 
-		#endregion
+    #endregion
 
-		#region Internal Methods
+    #region Internal Methods
 
-		/// <summary>
-		/// Gets <see cref="LogLevelSupportItem"/> for the specified level.
-		/// </summary>
-		/// <param name="level">Level to get the support item for.</param>
-		/// <returns>Support item for the level.</returns>
-		internal LogLevelSupportItem GetSupportItem(LogLevel level) {
-			return this.levelSupportItems[level];
-		}
+    /// <summary>
+    /// Gets <see cref="LogLevelSupportItem"/> for the specified level.
+    /// </summary>
+    /// <param name="level">Level to get the support item for.</param>
+    /// <returns>Support item for the level.</returns>
+    internal LogLevelSupportItem GetSupportItem(LogLevel level)
+    {
+      return this.levelSupportItems[level];
+    }
 
-		internal PerTypeLoggingData GetPerTypeLoggingData(TypeDefDeclaration type) {
-			return this.perTypeLoggingDatas[type];
-		}
+    internal PerTypeLoggingData GetPerTypeLoggingData(TypeDefDeclaration type)
+    {
+      return this.perTypeLoggingDatas[type];
+    }
 
-		#endregion
+    #endregion
 
-		#region Protected Methods
+    #region Protected Methods
 
-		protected override void Initialize() {
-			// Target module.
-			ModuleDeclaration module = this.Project.Module;
+    protected override void Initialize()
+    {
+      // Target module.
+      ModuleDeclaration module = this.Project.Module;
 
-			// Prepare types and methods. They will be used later by advices.
-			this.boolType = module.FindType(typeof (bool), BindingOptions.Default);
-			this.objectType = module.FindType(typeof (object), BindingOptions.Default);
-			this.invariantCultureGetter = module.FindMethod(typeof (CultureInfo).GetProperty("InvariantCulture").GetGetMethod(), BindingOptions.Default);
-			this.getLoggerMethod = module.FindMethod(typeof (LogManager).GetMethod("GetLogger", new Type[] {typeof (Type)}), BindingOptions.Default);
-			this.ilogType = module.FindType(typeof (ILog), BindingOptions.Default);
-			this.compilerGeneratedAttributeType = module.FindType(typeof (CompilerGeneratedAttribute), BindingOptions.Default).GetTypeDefinition();
+      // Prepare types and methods. They will be used later by advices.
+      this.boolType = module.FindType(typeof(bool), BindingOptions.Default);
+      this.objectType = module.FindType(typeof(object), BindingOptions.Default);
+      this.invariantCultureGetter = module.FindMethod(typeof(CultureInfo).GetProperty("InvariantCulture").GetGetMethod(), BindingOptions.Default);
+      this.getLoggerMethod = module.FindMethod(typeof(LogManager).GetMethod("GetLogger", new Type[] { typeof(Type) }), BindingOptions.Default);
+      this.ilogType = module.FindType(typeof(ILog), BindingOptions.Default);
+      this.compilerGeneratedAttributeType = module.FindType(typeof(CompilerGeneratedAttribute), BindingOptions.Default).GetTypeDefinition();
 
-			// Prepare level support items for all levels.
-			this.levelSupportItems[LogLevel.Debug] = this.CreateSupportItem("Debug");
-			this.levelSupportItems[LogLevel.Info] = this.CreateSupportItem("Info");
-			this.levelSupportItems[LogLevel.Warn] = this.CreateSupportItem("Warn");
-			this.levelSupportItems[LogLevel.Error] = this.CreateSupportItem("Error");
-			this.levelSupportItems[LogLevel.Fatal] = this.CreateSupportItem("Fatal");
-		}
+      // Prepare level support items for all levels.
+      this.levelSupportItems[LogLevel.Debug] = this.CreateSupportItem("Debug");
+      this.levelSupportItems[LogLevel.Info] = this.CreateSupportItem("Info");
+      this.levelSupportItems[LogLevel.Warn] = this.CreateSupportItem("Warn");
+      this.levelSupportItems[LogLevel.Error] = this.CreateSupportItem("Error");
+      this.levelSupportItems[LogLevel.Fatal] = this.CreateSupportItem("Fatal");
+    }
 
-		#endregion
+    #endregion
 
-		#region IAdviceProvider Members
+    #region IAdviceProvider Members
 
-		public void ProvideAdvices(PostSharp.CodeWeaver.Weaver codeWeaver) {
-			// Gets the dictionary of custom attributes.
-			CustomAttributeDictionaryTask customAttributeDictionaryTask = CustomAttributeDictionaryTask.GetTask(this.Project);
+    public void ProvideAdvices(PostSharp.CodeWeaver.Weaver codeWeaver)
+    {
+      // Gets the dictionary of custom attributes.
+      CustomAttributeDictionaryTask customAttributeDictionaryTask = CustomAttributeDictionaryTask.GetTask(this.Project);
 
-			// Requests an enumerator of all instances of the LogAttribute.
-			IEnumerator<ICustomAttributeInstance> customAttributeEnumerator = customAttributeDictionaryTask.GetCustomAttributesEnumerator(typeof (LogAttribute), false);
+      // Requests an enumerator of all instances of the LogAttribute.
+      IEnumerator<ICustomAttributeInstance> customAttributeEnumerator = customAttributeDictionaryTask.GetCustomAttributesEnumerator(typeof(LogAttribute), false);
 
-			// For each instance of the LogAttribute. 
-			while (customAttributeEnumerator.MoveNext()) {
-				// Gets the method to which it applies. 
-				MethodDefDeclaration methodDef = customAttributeEnumerator.Current.TargetElement as MethodDefDeclaration;
-				if (methodDef != null) {
-					// Type whose constructor is being woven.
-					TypeDefDeclaration wovenType = methodDef.DeclaringType;
+      // For each instance of the LogAttribute. 
+      while (customAttributeEnumerator.MoveNext())
+      {
+        // Gets the method to which it applies. 
+        MethodDefDeclaration methodDef = customAttributeEnumerator.Current.TargetElement as MethodDefDeclaration;
+        if (methodDef != null)
+        {
+          // Type whose constructor is being woven.
+          TypeDefDeclaration wovenType = methodDef.DeclaringType;
 
-					// Do not weave interface.
-					if ((wovenType.Attributes & TypeAttributes.Interface) != TypeAttributes.Interface) {
-						// Constructs a custom attribute instance. 
-						LogAttribute attribute = (LogAttribute) CustomAttributeHelper.ConstructRuntimeObject(customAttributeEnumerator.Current.Value, this.Project.Module);
+          // Do not weave interface.
+          if ((wovenType.Attributes & TypeAttributes.Interface) != TypeAttributes.Interface)
+          {
+            // Constructs a custom attribute instance. 
+            LogAttribute attribute = (LogAttribute)CustomAttributeHelper.ConstructRuntimeObject(customAttributeEnumerator.Current.Value, this.Project.Module);
 
-						bool isMethodEligibleForInjection;
-						
-						if (attribute.IncludeCompilerGeneratedCode) {
-							// Logging code can be injected even if the method is compiler generated.
-							// Method processing can safely continue.
-							isMethodEligibleForInjection = true;
-						} else {
-							// Proceed with the method only when it is not compiler generated and 
-							// its declaring type is not generated.
-							isMethodEligibleForInjection = ! (methodDef.CustomAttributes.Contains(this.compilerGeneratedAttributeType) || methodDef.DeclaringType.CustomAttributes.Contains(this.compilerGeneratedAttributeType));
-						}
+            bool isMethodEligibleForInjection;
 
-						if (isMethodEligibleForInjection) {
-							// Build an advice based on this custom attribute.
-							LogAdvice advice = new LogAdvice(this, attribute);
+            if (attribute.IncludeCompilerGeneratedCode)
+            {
+              // Logging code can be injected even if the method is compiler generated.
+              // Method processing can safely continue.
+              isMethodEligibleForInjection = true;
+            }
+            else
+            {
+              // Proceed with the method only when it is not compiler generated and 
+              // its declaring type is not generated.
+              isMethodEligibleForInjection = !(methodDef.CustomAttributes.Contains(this.compilerGeneratedAttributeType) || methodDef.DeclaringType.CustomAttributes.Contains(this.compilerGeneratedAttributeType));
+            }
 
-							// Join point kinds that are used by respective logging code.
-							JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
-							JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
-							JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
-							// Sum of all required join point kinds;
-							JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
+            if (isMethodEligibleForInjection)
+            {
+              // Build an advice based on this custom attribute.
+              LogAdvice advice = new LogAdvice(this, attribute);
 
-							// Ensure there is at least one join point the logging advice applies to.
-							if (effectiveKinds != 0) {
-								if (!this.perTypeLoggingDatas.ContainsKey(wovenType)) {
-									this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
+              // Join point kinds that are used by respective logging code.
+              JoinPointKinds enterKinds = (attribute.EntryLevel != LogLevel.None) ? JoinPointKinds.BeforeMethodBody : 0;
+              JoinPointKinds exitKinds = (attribute.ExitLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodySuccess : 0;
+              JoinPointKinds exceptionKinds = (attribute.ExceptionLevel != LogLevel.None) ? JoinPointKinds.AfterMethodBodyException : 0;
+              // Sum of all required join point kinds;
+              JoinPointKinds effectiveKinds = enterKinds | exitKinds | exceptionKinds;
 
-									// Logging data for the woven type.
-									PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
+              // Ensure there is at least one join point the logging advice applies to.
+              if (effectiveKinds != 0)
+              {
+                if (!this.perTypeLoggingDatas.ContainsKey(wovenType))
+                {
+                  this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
 
-									// Field where ILog instance is stored.
-									FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
-									wovenType.Fields.Add(logField);
-									perTypeLoggingData.Log = logField;
+                  // Logging data for the woven type.
+                  PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
 
-									codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
-									                              JoinPointKinds.BeforeStaticConstructor,
-									                              new Singleton<TypeDefDeclaration>(wovenType));
-								}
+                  // Field where ILog instance is stored.
+                  FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
+                  wovenType.Fields.Add(logField);
+                  perTypeLoggingData.Log = logField;
 
-								codeWeaver.AddMethodLevelAdvice(advice,
-								                                new Singleton<MethodDefDeclaration>(methodDef),
-								                                effectiveKinds,
-								                                null);
-							}
-						}
-					}
-				}
-			}
-		}
+                  codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+                                                JoinPointKinds.BeforeStaticConstructor,
+                                                new Singleton<TypeDefDeclaration>(wovenType));
+                }
 
-		#endregion
+                codeWeaver.AddMethodLevelAdvice(advice,
+                                                new Singleton<MethodDefDeclaration>(methodDef),
+                                                effectiveKinds,
+                                                null);
+              }
+            }
+          }
+        }
+      }
+    }
 
-		public IEnumerable GetLevelSupportItems() {
-			return this.levelSupportItems.Values;
-		}
+    #endregion
 
-		/// <summary>
-		/// Produces MSIL code which adds logging fields and initializes them.
-		/// </summary>
-		private class LogInitializeAdvice : IAdvice {
-			/// <summary>
-			/// Task that owns this advice.
-			/// </summary>
-			private readonly LogTask parent;
+    public IEnumerable GetLevelSupportItems()
+    {
+      return this.levelSupportItems.Values;
+    }
 
-			public LogInitializeAdvice(LogTask parent) {
-				this.parent = parent;
-			}
+    /// <summary>
+    /// Produces MSIL code which adds logging fields and initializes them.
+    /// </summary>
+    private class LogInitializeAdvice : IAdvice
+    {
+      /// <summary>
+      /// Task that owns this advice.
+      /// </summary>
+      private readonly LogTask parent;
 
-			#region IAdvice Members
+      public LogInitializeAdvice(LogTask parent)
+      {
+        this.parent = parent;
+      }
 
-			public int Priority {
-				get { return int.MinValue; }
-			}
+      #region IAdvice Members
 
-			public bool RequiresWeave(WeavingContext context) {
-				return true;
-			}
+      public int Priority
+      {
+        get { return int.MinValue; }
+      }
 
-			public void Weave(WeavingContext context, InstructionBlock block) {
-				// Type whose constructor is being woven.
-				TypeDefDeclaration wovenType = context.Method.DeclaringType;
+      public bool RequiresWeave(WeavingContext context)
+      {
+        return true;
+      }
 
-				// Logging data for the woven type.
-				PerTypeLoggingData perTypeLoggingData = this.parent.perTypeLoggingDatas[wovenType];
+      public void Weave(WeavingContext context, InstructionBlock block)
+      {
+        // Type whose constructor is being woven.
+        TypeDefDeclaration wovenType = context.Method.DeclaringType;
 
-				InstructionSequence initializeSequence = context.Method.MethodBody.CreateInstructionSequence();
+        // Logging data for the woven type.
+        PerTypeLoggingData perTypeLoggingData = this.parent.perTypeLoggingDatas[wovenType];
 
-				block.AddInstructionSequence(initializeSequence, NodePosition.Before, null);
+        InstructionSequence initializeSequence = context.Method.MethodBody.CreateInstructionSequence();
 
-				context.InstructionWriter.AttachInstructionSequence(initializeSequence);
-				context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
+        block.AddInstructionSequence(initializeSequence, NodePosition.Before, null);
 
-				// Get the declaring type of the constructor.
-				context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(wovenType), context.InstructionWriter);
-				// Stack: type.
-				// Get the logger for the method_declaring_type.
-				context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
-				// Stack: logger.
-				// Assign logger to the log variable.
-				context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
-				// Stack: .
+        context.InstructionWriter.AttachInstructionSequence(initializeSequence);
+        context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
-				context.InstructionWriter.DetachInstructionSequence();
-			}
+        // Get the declaring type of the constructor.
+        context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(wovenType), context.InstructionWriter);
+        // Stack: type.
+        // Get the logger for the method_declaring_type.
+        context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
+        // Stack: logger.
+        // Assign logger to the log variable.
+        context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
+        // Stack: .
 
-			#endregion
-		}
-	}
+        context.InstructionWriter.DetachInstructionSequence();
+      }
+
+      #endregion
+    }
+  }
 }

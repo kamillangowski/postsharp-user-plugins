@@ -26,28 +26,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using PostSharp.CodeModel;
 
-namespace Log4PostSharp.Weaver {
+namespace Log4PostSharp.Weaver
+{
+  /// <summary>
+  /// Represents set of fields that are used to log messages.
+  /// </summary>
+  internal class PerTypeLoggingData
+  {
     /// <summary>
-    /// Represents set of fields that are used to log messages.
+    /// Field that points to the ILog instance.
     /// </summary>
-    internal class PerTypeLoggingData {
-        /// <summary>
-        /// Field that points to the ILog instance.
-        /// </summary>
-        private FieldDefDeclaration log;
+    private FieldDefDeclaration log;
 
-        /// <summary>
-        /// Gets or sets the field that points to the ILog instance.
-        /// </summary>
-        public FieldDefDeclaration Log {
-            get { return this.log; }
-            set { this.log = value; }
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PerTypeLoggingData"/> class.
-        /// </summary>
-        public PerTypeLoggingData() {
-        }
+    /// <summary>
+    /// Gets or sets the field that points to the ILog instance.
+    /// </summary>
+    public FieldDefDeclaration Log
+    {
+      get { return this.log; }
+      set { this.log = value; }
     }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PerTypeLoggingData"/> class.
+    /// </summary>
+    public PerTypeLoggingData()
+    {
+    }
+  }
 }
