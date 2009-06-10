@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp", "Log4PostSharp\Log4PostSharp.csproj", "{3CFD766D-B991-4444-84A6-49BDFF81CF63}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Weaver", "Log4PostSharp.Weaver\Log4PostSharp.Weaver.csproj", "{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Test", "Log4PostSharp.Test\Log4PostSharp.Test.csproj", "{ED16B3ED-D807-43DB-AEBA-EAF89604B418}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3CFD766D-B991-4444-84A6-49BDFF81CF63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CFD766D-B991-4444-84A6-49BDFF81CF63}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CFD766D-B991-4444-84A6-49BDFF81CF63}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CFD766D-B991-4444-84A6-49BDFF81CF63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
