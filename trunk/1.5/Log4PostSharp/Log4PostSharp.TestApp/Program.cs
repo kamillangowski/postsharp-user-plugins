@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Log4PostSharp.Test {
+namespace Log4PostSharp.TestApp {
 	public class Program {
 		public static void MethodWithNoReturnValue() {
 		}

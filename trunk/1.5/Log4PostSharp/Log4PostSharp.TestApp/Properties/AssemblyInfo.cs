@@ -8,11 +8,11 @@ using Log4PostSharp;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Log4PostSharp.Test")]
+[assembly: AssemblyTitle("Log4PostSharp.TestApp")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Michal Dabrowski")]
-[assembly: AssemblyProduct("Log4PostSharp.Test")]
+[assembly: AssemblyProduct("Log4PostSharp.TestApp")]
 [assembly: AssemblyCopyright("Copyright © Michal Dabrowski 2008")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -37,4 +37,4 @@ using Log4PostSharp;
 
 [assembly: XmlConfigurator(Watch = true)]
 
-[assembly: Log(AttributeTargetTypes = "Log4PostSharp.Test.*", EntryLevel = LogLevel.Debug, ExitLevel = LogLevel.Debug, ExceptionLevel = LogLevel.Error)]
+[assembly: Log(AttributeTargetTypes = "Log4PostSharp.TestApp.*", EntryLevel = LogLevel.Debug, ExitLevel = LogLevel.Debug, ExceptionLevel = LogLevel.Error)]
