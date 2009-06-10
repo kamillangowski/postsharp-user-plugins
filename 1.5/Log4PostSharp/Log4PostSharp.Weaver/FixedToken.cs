@@ -29,56 +29,64 @@ using System;
 using PostSharp.CodeModel;
 using PostSharp.CodeWeaver;
 
-namespace Log4PostSharp.Weaver {
-	/// <summary>
-	/// Represents the token that contains fixed string which is known at weave-time.
-	/// </summary>
-	public class FixedToken : IMessageToken {
-		#region Private Fields
+namespace Log4PostSharp.Weaver
+{
+  /// <summary>
+  /// Represents the token that contains fixed string which is known at weave-time.
+  /// </summary>
+  public class FixedToken : IMessageToken
+  {
+    #region Private Fields
 
-		/// <summary>
-		/// Fixed contents of this token.
-		/// </summary>
-		private readonly string text;
+    /// <summary>
+    /// Fixed contents of this token.
+    /// </summary>
+    private readonly string text;
 
-		#endregion
+    #endregion
 
-		#region Public Constructors
+    #region Public Constructors
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="FixedToken"/> class
-		/// with the specified contents.
-		/// </summary>
-		/// <param name="text">Contents for the token.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
-		public FixedToken(string text) {
-			if (text == null) {
-				throw new ArgumentNullException("text");
-			}
+    /// <summary>
+    /// Initializes a new instance of the <see cref="FixedToken"/> class
+    /// with the specified contents.
+    /// </summary>
+    /// <param name="text">Contents for the token.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="text"/> is <see langword="null"/>.</exception>
+    public FixedToken(string text)
+    {
+      if (text == null)
+      {
+        throw new ArgumentNullException("text");
+      }
 
-			this.text = text;
-		}
+      this.text = text;
+    }
 
-		#endregion
+    #endregion
 
-		#region IMessageToken Members
+    #region IMessageToken Members
 
-		public bool IsStatic {
-			get { return true; }
-		}
+    public bool IsStatic
+    {
+      get { return true; }
+    }
 
-		public string Text {
-			get { return this.text; }
-		}
+    public string Text
+    {
+      get { return this.text; }
+    }
 
-		public void Emit(WeavingContext context) {
-			if (context == null) {
-				throw new ArgumentNullException("context");
-			}
+    public void Emit(WeavingContext context)
+    {
+      if (context == null)
+      {
+        throw new ArgumentNullException("context");
+      }
 
-			context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, this.Text);
-		}
+      context.InstructionWriter.EmitInstructionString(OpCodeNumber.Ldstr, this.Text);
+    }
 
-		#endregion
-	}
+    #endregion
+  }
 }

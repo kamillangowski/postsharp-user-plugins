@@ -28,40 +28,42 @@ using System;
 
 using PostSharp.CodeWeaver;
 
-namespace Log4PostSharp.Weaver {
-	/// <summary>
-	/// Represents a part of log message.
-	/// </summary>
-	public interface IMessageToken {
-		/// <summary>
-		/// Gets a value indicating whether context of the token can be determined at weave-time.
-		/// </summary>
-		/// <value>
-		/// <see langword="true"/> if the contents of this token can be determined at weave-time or
-		/// <see langword="false"/> otherwise.
-		/// </value>
-		bool IsStatic { get; }
+namespace Log4PostSharp.Weaver
+{
+  /// <summary>
+  /// Represents a part of log message.
+  /// </summary>
+  public interface IMessageToken
+  {
+    /// <summary>
+    /// Gets a value indicating whether context of the token can be determined at weave-time.
+    /// </summary>
+    /// <value>
+    /// <see langword="true"/> if the contents of this token can be determined at weave-time or
+    /// <see langword="false"/> otherwise.
+    /// </value>
+    bool IsStatic { get; }
 
-		/// <summary>
-		/// Gets the contents of the token.
-		/// </summary>
-		/// <value>
-		/// Contents of the token.
-		/// </value>
-		/// <exception cref="NotSupportedException">Contents of the token can be determined only at run-time (<see cref="IsStatic"/> is <see langword="false"/>).</exception>
-		string Text { get; }
+    /// <summary>
+    /// Gets the contents of the token.
+    /// </summary>
+    /// <value>
+    /// Contents of the token.
+    /// </value>
+    /// <exception cref="NotSupportedException">Contents of the token can be determined only at run-time (<see cref="IsStatic"/> is <see langword="false"/>).</exception>
+    string Text { get; }
 
-		/// <summary>
-		/// Emits sequence of instructions that pushes the contents of the token onto the evaluation stack.
-		/// </summary>
-		/// <param name="context">Weaving context.</param>
-		/// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
-		/// <remarks>
-		/// <para>Code emitted by this method does not make any assumptions on the state of the evaluation
-		/// stack, but it modifies the stack by pushing the reference to the object that represents the
-		/// token contents. The object can be included in the array of arguments that is later passed
-		/// to the <see cref="string.Format(IFormatProvider,string,object[])"/> (or compatible) method.</para>
-		/// </remarks>
-		void Emit(WeavingContext context);
-	}
+    /// <summary>
+    /// Emits sequence of instructions that pushes the contents of the token onto the evaluation stack.
+    /// </summary>
+    /// <param name="context">Weaving context.</param>
+    /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
+    /// <remarks>
+    /// <para>Code emitted by this method does not make any assumptions on the state of the evaluation
+    /// stack, but it modifies the stack by pushing the reference to the object that represents the
+    /// token contents. The object can be included in the array of arguments that is later passed
+    /// to the <see cref="string.Format(IFormatProvider,string,object[])"/> (or compatible) method.</para>
+    /// </remarks>
+    void Emit(WeavingContext context);
+  }
 }
