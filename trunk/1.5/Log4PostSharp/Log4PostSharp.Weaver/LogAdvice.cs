@@ -358,7 +358,7 @@ namespace Log4PostSharp.Weaver
         // Get the tokens for the message template.
         StringBuilder messageFormatString = new StringBuilder();
         List<IMessageToken> nonStaticTokens = new List<IMessageToken>();
-        List<IMessageToken> messageParts = TemplateParser.Tokenize(template, wovenMethod);
+        List<IMessageToken> messageParts = TemplateParser.Tokenize(template, wovenMethod, attribute.IncludeParamName);
         MakeFormatString(messageParts, messageFormatString, nonStaticTokens);
 
         // Sequence that contains the logging check and the logging itself.
@@ -429,7 +429,7 @@ namespace Log4PostSharp.Weaver
         // Get the tokens for the message template.
         StringBuilder messageFormatString = new StringBuilder();
         List<IMessageToken> nonStaticTokens = new List<IMessageToken>();
-        List<IMessageToken> messageParts = TemplateParser.Tokenize(text, wovenMethod);
+        List<IMessageToken> messageParts = TemplateParser.Tokenize(text, wovenMethod, attribute.IncludeParamName);
         MakeFormatString(messageParts, messageFormatString, nonStaticTokens);
 
         // As log4net does not provide an overload for the LogXXX() methods which would accept

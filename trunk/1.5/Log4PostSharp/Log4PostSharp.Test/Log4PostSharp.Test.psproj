@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.postsharp.org/1.0/configuration">
+	<SearchPath Directory="../Log4PostSharp.Weaver/bin/{$Configuration}"/>
+	<SearchPath Directory="{$SearchPath}" />
+	<Tasks>
+		<AutoDetect />
+		<Compile TargetFile="{$Output}" IntermediateDirectory="{$IntermediateDirectory}"  CleanIntermediate="false" />
+	</Tasks>
+</Project>

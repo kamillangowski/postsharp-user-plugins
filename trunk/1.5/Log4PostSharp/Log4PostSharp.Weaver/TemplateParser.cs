@@ -27,8 +27,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using System.Text;
-
 using PostSharp.CodeModel;
 
 namespace Log4PostSharp.Weaver
@@ -53,17 +53,27 @@ namespace Log4PostSharp.Weaver
     /// <summary>
     /// Long version of placeholder that indicates method signature token.
     /// </summary>
-    private static readonly string signaturePlaceholder1 = "signature";
+    private static readonly string signaturePlaceholder = "signature";
 
     /// <summary>
-    /// Short version of placeholder that indicates method signature token.
+    /// Placeholder that indicates method name.
     /// </summary>
-    private static readonly string signaturePlaceholder2 = "sig";
+    private static readonly string methodNamePlaceholder = "method";
 
     /// <summary>
     /// Placeholder that indicates comma-separated list of values of all method parameters.
     /// </summary>
     private static readonly string shortParameterList = "paramvalues";
+
+    /// <summary>
+    /// Placeholder that indicates comma-separated list of values of all method input parameters.
+    /// </summary>
+    private static readonly string shortInParameterList = "inparamvalues";
+
+    /// <summary>
+    /// Placeholder that indicates comma-separated list of values of all method output parameters.
+    /// </summary>
+    private static readonly string shortOutParameterList = "outparamvalues";
 
     /// <summary>
     /// Prefix that indicates method parameter token.
@@ -75,9 +85,47 @@ namespace Log4PostSharp.Weaver
     /// </summary>
     private static readonly string returnValue = "returnvalue";
 
+    private static readonly Type[] EmptyTypeArray = new Type[0];
+
     #endregion
 
     #region Private Methods
+
+    /// <summary>
+    /// Yields all the input parameters of the given woven method.
+    /// </summary>
+    /// <param name="wovenMethod">A woven method.</param>
+    /// <remarks>
+    /// Note, that a <c>ref</c> parameter is an input parameter.
+    /// </remarks>
+    private static IEnumerable<ParameterDeclaration> YieldInParameters(MethodDefDeclaration wovenMethod)
+    {
+      foreach (ParameterDeclaration parameter in wovenMethod.Parameters)
+      {
+        if ((parameter.Attributes & (ParameterAttributes.Out | ParameterAttributes.Retval)) == 0)
+        {
+          // Found a parameter, which is neither Out nor Retval. It is an input parameter.
+          // Note, that by ref parameters are also input.
+          yield return parameter;
+        }
+      }
+    }
+
+    /// <summary>
+    /// Yields all the output parameters of the given woven method.
+    /// </summary>
+    /// <param name="wovenMethod">A woven method.</param>
+    private static IEnumerable<ParameterDeclaration> YieldOutParameters(MethodDefDeclaration wovenMethod)
+    {
+      foreach (ParameterDeclaration parameter in wovenMethod.Parameters)
+      {
+        if ((parameter.Attributes & (ParameterAttributes.Out | ParameterAttributes.Retval)) != 0 ||
+            parameter.ParameterType.BelongsToClassification(TypeClassifications.Pointer))
+        {
+          yield return parameter;
+        }
+      }
+    }
 
     /// <summary>
     /// Gets text containing the signature of the specified method.
@@ -103,9 +151,11 @@ namespace Log4PostSharp.Weaver
     /// <param name="placeholder">Placeholder to create token for.</param>
     /// <param name="target">List to appent the token to.</param>
     /// <param name="wovenMethod">Method being woven.</param>
+    /// <param name="includeParamName">Indicates, whether parameter names should be included in the log.</param>
     /// <exception cref="ArgumentNullException"><paramref name="placeholder"/>, <paramref name="target"/> or <paramref name="wovenMethod"/> is <see langword="null"/>.</exception>
     /// <exception cref="FormatException"><paramref name="placeholder"/> is invalid or unrecognized placeholder.</exception>
-    private static void ProcessPlaceholder(string placeholder, ICollection<IMessageToken> target, MethodDefDeclaration wovenMethod)
+    private static void ProcessPlaceholder(string placeholder, ICollection<IMessageToken> target,
+        MethodDefDeclaration wovenMethod, bool includeParamName)
     {
       if (placeholder == null)
       {
@@ -120,10 +170,13 @@ namespace Log4PostSharp.Weaver
         throw new ArgumentNullException("wovenMethod");
       }
 
-      if (string.Equals(placeholder, signaturePlaceholder2, StringComparison.InvariantCulture)
-          || string.Equals(placeholder, signaturePlaceholder1, StringComparison.InvariantCulture))
+      if (string.Equals(placeholder, signaturePlaceholder, StringComparison.InvariantCulture))
       {
         target.Add(new FixedToken(GetMethodSignature(wovenMethod)));
+      }
+      else if (string.Equals(placeholder, methodNamePlaceholder, StringComparison.InvariantCulture))
+      {
+        target.Add(new FixedToken(wovenMethod.Name));
       }
       else if (placeholder.StartsWith(parameterPrefix, StringComparison.InvariantCulture))
       {
@@ -148,32 +201,15 @@ namespace Log4PostSharp.Weaver
       }
       else if (string.Equals(placeholder, shortParameterList, StringComparison.InvariantCulture))
       {
-        // Check if the method has any parameters.
-        if (wovenMethod.Parameters.Count > 0)
-        {
-          // Add opening quote for the first parameter.
-          target.Add(new FixedToken(@""""));
-
-          bool isFirstParameter = true;
-          foreach (ParameterDeclaration parameter in wovenMethod.Parameters)
-          {
-            // Do not prepend anything before the first parameter.
-            if (!isFirstParameter)
-            {
-              // Add closing quote for the previous parameter, then comma, then opening quote for the current parameter.
-              target.Add(new FixedToken(@""", """));
-            }
-
-            // Append parameter value.
-            target.Add(new ParameterValueToken(parameter));
-
-            // Next parameter is not the first one.
-            isFirstParameter = false;
-          }
-
-          // Add closing quote for the last parameter.
-          target.Add(new FixedToken(@""""));
-        }
+        AddParamsMessageTokens(target, wovenMethod.Parameters, includeParamName);
+      }
+      else if (string.Equals(placeholder, shortInParameterList, StringComparison.InvariantCulture))
+      {
+        AddParamsMessageTokens(target, YieldInParameters(wovenMethod), includeParamName);
+      }
+      else if (string.Equals(placeholder, shortOutParameterList, StringComparison.InvariantCulture))
+      {
+        AddParamsMessageTokens(target, YieldOutParameters(wovenMethod), includeParamName);
       }
       else if (string.Equals(placeholder, returnValue, StringComparison.InvariantCulture))
       {
@@ -182,6 +218,68 @@ namespace Log4PostSharp.Weaver
       else
       {
         throw new FormatException(string.Format(CultureInfo.CurrentCulture, "Unknown placeholder in template: {0}.", placeholder));
+      }
+    }
+
+    private static bool IsStringParameter(ParameterDeclaration parameter)
+    {
+      if (!parameter.ParameterType.IsGenericDefinition)
+      {
+        Type sysParamType = parameter.ParameterType.GetSystemType(EmptyTypeArray, EmptyTypeArray);
+        if (sysParamType != null)
+        {
+          if (sysParamType.IsByRef)
+          {
+            sysParamType = sysParamType.GetElementType();
+          }
+          return sysParamType == typeof(string);
+        }
+      }
+      return false;
+    }
+
+    private static void AddParamsMessageTokens(ICollection<IMessageToken> target,
+        IEnumerable<ParameterDeclaration> parameters, bool includeParamName)
+    {
+      bool isString = false;
+      string closingDelim = string.Empty;
+      foreach (ParameterDeclaration parameter in parameters)
+      {
+        isString = IsStringParameter(parameter);
+        if (isString)
+        {
+          if (includeParamName)
+          {
+            target.Add(new FixedToken(string.Format(CultureInfo.InvariantCulture,
+                "{0}{1}: \"", closingDelim, parameter.Name)));
+          }
+          else
+          {
+            target.Add(new FixedToken(closingDelim + @""""));
+          }
+          closingDelim = @""", ";
+        }
+        else
+        {
+          if (includeParamName)
+          {
+            target.Add(new FixedToken(string.Format(CultureInfo.InvariantCulture,
+                "{0}{1}: ", closingDelim, parameter.Name)));
+          }
+          else
+          {
+            target.Add(new FixedToken(closingDelim));
+          }
+          closingDelim = @", ";
+        }
+
+        // Append parameter value.
+        target.Add(new ParameterValueToken(parameter));
+      }
+
+      if (isString)
+      {
+        target.Add(new FixedToken(@""""));
       }
     }
 
@@ -197,7 +295,8 @@ namespace Log4PostSharp.Weaver
     /// <returns>List of tokens in the specified template.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="template"/> or <paramref name="wovenMethod"/> is <see langword="null"/>.</exception>
     /// <exception cref="FormatException"><paramref name="template"/> is invalid and cannot be parsed.</exception>
-    public static List<IMessageToken> Tokenize(string template, MethodDefDeclaration wovenMethod)
+    public static List<IMessageToken> Tokenize(string template, MethodDefDeclaration wovenMethod,
+        bool includeParamName)
     {
       if (template == null)
       {
@@ -243,7 +342,7 @@ namespace Log4PostSharp.Weaver
               {
                 // Obtain the placeholder.
                 string placeholder = template.Substring(sequenceBeginningIndex + 1, sequenceEndingIndex - sequenceBeginningIndex - 1);
-                ProcessPlaceholder(placeholder, ret, wovenMethod);
+                ProcessPlaceholder(placeholder, ret, wovenMethod, includeParamName);
 
                 // Next fragment starts right after the sequence.
                 nextFragmentBeginningIndex = sequenceEndingIndex + 1;

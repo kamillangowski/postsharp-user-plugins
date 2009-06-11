@@ -35,17 +35,27 @@
     <DocumentationFile>bin\Release\Log4PostSharp.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="LogAttribute.cs" />
+    <Compile Include="LoggerAttribute.cs" />
+    <Compile Include="LoggerHelper.cs" />
+    <Compile Include="LoggerPolicyAttribute.cs" />
     <Compile Include="LogLevel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -74,22 +74,23 @@ namespace Log4PostSharp
     AllowMultiple = true,
     Inherited = false)]
   [MulticastAttributeUsage(
-    MulticastTargets.Constructor | MulticastTargets.Method,
+  MulticastTargets.InstanceConstructor | MulticastTargets.StaticConstructor | MulticastTargets.Method,
     AllowMultiple = true)]
   [Serializable]
-  public sealed class LogAttribute : MulticastAttribute, IRequirePostSharp
+  [RequirePostSharp("Log4PostSharp", "Log4PostSharp.Weaver.LogTask")]
+  public sealed class LogAttribute : MulticastAttribute
   {
     #region Private Fields
 
     /// <summary>
     /// Level of messages logged when a method is entered.
     /// </summary>
-    private LogLevel entryLevel = LogLevel.None;
+    private LogLevel entryLevel = LogLevel.Debug;
 
     /// <summary>
     /// Message to log when a method is entered.
     /// </summary>
-    private string entryText = "Entering method: {signature}.";
+    private string entryText = "{method}({inparamvalues})";
 
     /// <summary>
     /// Level of messages logged when a method is exited normally (i.e. without throwing exception).
@@ -99,17 +100,17 @@ namespace Log4PostSharp
     /// <summary>
     /// Message to log when a method is exited normally (i.e. without throwing exception).
     /// </summary>
-    private string exitText = "Exiting method: {signature}.";
+    private string exitText = "{method} = {returnvalue} ({outparamvalues})";
 
     /// <summary>
     /// Level of messages logged when an exception is thrown from a method.
     /// </summary>
-    private LogLevel exceptionLevel = LogLevel.None;
+    private LogLevel exceptionLevel = LogLevel.Error;
 
     /// <summary>
     /// Message to log when an exception is thrown from a method.
     /// </summary>
-    private string exceptionText = "Exception thrown from method: {signature}.";
+    private string exceptionText = "{method} failed with exception";
 
     /// <summary>
     /// Priority of this aspect.
@@ -120,6 +121,11 @@ namespace Log4PostSharp
     /// Underlying field for the <see cref="IncludeCompilerGeneratedCode"/> property.
     /// </summary>
     private bool includeCompilerGeneratedCode = false;
+
+    /// <summary>
+    /// Underlying field for the <see cref="IncludeParamName"/> property.
+    /// </summary>
+    private bool includeParamName = true;
 
     #endregion
 
@@ -252,6 +258,18 @@ namespace Log4PostSharp
       set { this.includeCompilerGeneratedCode = value; }
     }
 
+    /// <summary>
+    /// Indicates whether parameters are logged with their respective parameter names.
+    /// </summary>
+    /// <remarks>
+    /// The default is <c>true</c>.
+    /// </remarks>
+    public bool IncludeParamName
+    {
+      get { return includeParamName; }
+      set { includeParamName = value; }
+    }
+
     #endregion
 
     #region Public Constructors
@@ -284,18 +302,6 @@ namespace Log4PostSharp
       this.entryLevel = entryLevel;
       this.entryText = entryText;
       this.exceptionLevel = LogLevel.Error;
-    }
-
-    #endregion
-
-    #region IRequirePostSharp Members
-
-    PostSharpRequirements IRequirePostSharp.GetPostSharpRequirements()
-    {
-      PostSharpRequirements requirements = new PostSharpRequirements();
-      requirements.PlugIns.Add("Log4PostSharp");
-      requirements.Tasks.Add("Log4PostSharp.Weaver.LogTask");
-      return requirements;
     }
 
     #endregion
