@@ -4,11 +4,12 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}</ProjectGuid>
+    <ProjectGuid>{BB35D207-9B60-4301-A4DA-B40CFBA3255E}</ProjectGuid>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Log4PostSharp.Weaver</RootNamespace>
-    <AssemblyName>Log4PostSharp.Weaver</AssemblyName>
+    <RootNamespace>Log4PostSharp.Test</RootNamespace>
+    <AssemblyName>Log4PostSharp.Test</AssemblyName>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -20,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;SkipPostSharp</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <DocumentationFile>
@@ -30,7 +31,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;SkipPostSharp</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -39,50 +40,51 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="PostSharp.Core, Version=1.0.7.261, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
-      <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Core\bin\debug\PostSharp.Core.dll</HintPath>
-      <SpecificVersion>False</SpecificVersion>
-    </Reference>
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
       <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
-    <Reference Include="System.Core">
-      <RequiredTargetFramework>3.5</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FixedToken.cs" />
-    <Compile Include="IMessageToken.cs" />
-    <Compile Include="LogAdvice.cs" />
-    <Compile Include="LogLevelSupportItem.cs" />
-    <Compile Include="LogTask.cs" />
-    <Compile Include="ParameterValueToken.cs" />
-    <Compile Include="PerTypeLoggingData.cs" />
+    <Compile Include="LoggerAttributeTest.cs" />
+    <Compile Include="LoggerPolicyAttributeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReturnValueToken.cs" />
-    <Compile Include="TemplateParser.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Log4PostSharp.Weaver\Log4PostSharp.Weaver.csproj">
+      <Project>{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}</Project>
+      <Name>Log4PostSharp.Weaver</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Log4PostSharp\Log4PostSharp.csproj">
       <Project>{3CFD766D-B991-4444-84A6-49BDFF81CF63}</Project>
       <Name>Log4PostSharp</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Log4PostSharp.psplugin">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <None Include="app.config" />
+    <None Include="Log4PostSharp.Test.psproj" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <!-- The following section is conditioned by the presence of the current file
+       in the source tree. If this file is in a binary distribution, the
+       section below will not be executed. Instead, PostSharp should already
+       have been integrated in the default MSBuild process.                       -->
+  <PropertyGroup Condition=" Exists('$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\debug\PostSharp.targets') ">
+    <DontImportPostSharp>True</DontImportPostSharp>
+    <PostSharpDirectory>$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\debug\</PostSharpDirectory>
+    <PostSharpUseCommandLine>True</PostSharpUseCommandLine>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="$(PostSharpDirectory)PostSharp.targets" Condition=" Exists('$(PostSharpDirectory)PostSharp.targets') " />
 </Project>

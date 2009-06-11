@@ -62,9 +62,19 @@ namespace Log4PostSharp.Weaver
     private IMethod invariantCultureGetter;
 
     /// <summary>
-    /// log4net.LogManager.GetLogger(System.Type) method.
+    /// log4net.LogManager.GetLogger(System.String) method.
     /// </summary>
-    private IMethod getLoggerMethod;
+    private IMethod getLoggerByStringMethod;
+
+    /// <summary>
+    /// Log4PostSharpLogHelper.RegisterLogger(System.Type) method.
+    /// </summary>
+    private IMethod registerLoggerMethod;
+
+    /// <summary>
+    /// Log4PostSharpLogHelper.RegisterLogger(System.Type, Log4PostSharp.LoggerNamePolicy, Log4PostSharp.LoggerNamePolicy) method.
+    /// </summary>
+    private IMethod registerLoggerWithPolicyMethod;
 
     /// <summary>
     /// log4net.ILog type.
@@ -143,6 +153,19 @@ namespace Log4PostSharp.Weaver
       return new LogLevelSupportItem(isLoggingEnabledGetter, logStringMethod, logStringExceptionMethod, logCultureStringArgsMethod);
     }
 
+    private void AddTypeLogginData(TypeDefDeclaration wovenType)
+    {
+      this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
+
+      // Logging data for the woven type.
+      PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
+
+      // Field where ILog instance is stored.
+      FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
+      wovenType.Fields.Add(logField);
+      perTypeLoggingData.Log = logField;
+    }
+
     #endregion
 
     #region Internal Properties
@@ -163,13 +186,28 @@ namespace Log4PostSharp.Weaver
       get { return this.invariantCultureGetter; }
     }
 
+
     /// <summary>
-    /// Gets the log4net.LogManager.GetLogger(System.Type) method.
+    /// Gets the log4net.LogManager.GetLogger(System.String) method.
     /// </summary>
-    internal IMethod GetLoggerMethod
+    internal IMethod GetLoggerByStringMethod
     {
-      get { return this.getLoggerMethod; }
+      get { return this.getLoggerByStringMethod; }
     }
+
+    /// <summary>
+    /// Gets the Log4PostSharp.LogHelper.RegisterLogger(System.Type) method.
+    /// </summary>
+    internal IMethod RegisterLoggerMethod
+    {
+      get { return this.registerLoggerMethod; }
+    }
+
+    internal IMethod RegisterLoggerWithPolicyMethod
+    {
+      get { return this.registerLoggerWithPolicyMethod; }
+    }
+
 
     /// <summary>
     /// Gets the log4net.ILog type.
@@ -211,7 +249,10 @@ namespace Log4PostSharp.Weaver
       this.boolType = module.FindType(typeof(bool), BindingOptions.Default);
       this.objectType = module.FindType(typeof(object), BindingOptions.Default);
       this.invariantCultureGetter = module.FindMethod(typeof(CultureInfo).GetProperty("InvariantCulture").GetGetMethod(), BindingOptions.Default);
-      this.getLoggerMethod = module.FindMethod(typeof(LogManager).GetMethod("GetLogger", new Type[] { typeof(Type) }), BindingOptions.Default);
+      this.getLoggerByStringMethod = module.FindMethod(typeof(LogManager).GetMethod("GetLogger", new Type[] { typeof(string) }), BindingOptions.Default);
+      this.registerLoggerMethod = module.FindMethod(typeof(LoggerHelper).GetMethod("RegisterLogger", new Type[] { typeof(Type) }), BindingOptions.Default);
+      this.registerLoggerWithPolicyMethod = module.FindMethod(typeof(LoggerHelper).GetMethod("RegisterLogger", new Type[] { typeof(Type), typeof(LoggerNamePolicy), typeof(LoggerNamePolicy) }), BindingOptions.Default);
+
       this.ilogType = module.FindType(typeof(ILog), BindingOptions.Default);
       this.compilerGeneratedAttributeType = module.FindType(typeof(CompilerGeneratedAttribute), BindingOptions.Default).GetTypeDefinition();
 
@@ -229,11 +270,13 @@ namespace Log4PostSharp.Weaver
 
     public void ProvideAdvices(PostSharp.CodeWeaver.Weaver codeWeaver)
     {
+      LogInitializeAdvice.InitializeLoggerPolicies(this);
+
       // Gets the dictionary of custom attributes.
-      CustomAttributeDictionaryTask customAttributeDictionaryTask = CustomAttributeDictionaryTask.GetTask(this.Project);
+      var customAttributeDictionaryTask = AnnotationRepositoryTask.GetTask(this.Project);
 
       // Requests an enumerator of all instances of the LogAttribute.
-      IEnumerator<ICustomAttributeInstance> customAttributeEnumerator = customAttributeDictionaryTask.GetCustomAttributesEnumerator(typeof(LogAttribute), false);
+      var customAttributeEnumerator = customAttributeDictionaryTask.GetAnnotationsOfType(typeof(LogAttribute), false);
 
       // For each instance of the LogAttribute. 
       while (customAttributeEnumerator.MoveNext())
@@ -283,19 +326,12 @@ namespace Log4PostSharp.Weaver
               {
                 if (!this.perTypeLoggingDatas.ContainsKey(wovenType))
                 {
-                  this.perTypeLoggingDatas.Add(wovenType, new PerTypeLoggingData());
 
-                  // Logging data for the woven type.
-                  PerTypeLoggingData perTypeLoggingData = this.perTypeLoggingDatas[wovenType];
-
-                  // Field where ILog instance is stored.
-                  FieldDefDeclaration logField = CreateField("~log4PostSharp~log", this.ilogType);
-                  wovenType.Fields.Add(logField);
-                  perTypeLoggingData.Log = logField;
-
+                  AddTypeLogginData(wovenType);
                   codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
                                                 JoinPointKinds.BeforeStaticConstructor,
                                                 new Singleton<TypeDefDeclaration>(wovenType));
+
                 }
 
                 codeWeaver.AddMethodLevelAdvice(advice,
@@ -305,6 +341,38 @@ namespace Log4PostSharp.Weaver
               }
             }
           }
+        }
+      }
+
+      //Check for types having LoggerAttribute and have no LogAttribute.
+      customAttributeEnumerator = customAttributeDictionaryTask.GetAnnotationsOfType(typeof(LoggerAttribute), false);
+      while (customAttributeEnumerator.MoveNext())
+      {
+        // Gets the method to which it applies. 
+        TypeDefDeclaration wovenType = customAttributeEnumerator.Current.TargetElement as TypeDefDeclaration;
+        if (wovenType != null && !perTypeLoggingDatas.ContainsKey(wovenType))
+        {
+          //Weave
+          AddTypeLogginData(wovenType);
+          codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+                              JoinPointKinds.BeforeStaticConstructor,
+                              new Singleton<TypeDefDeclaration>(wovenType));
+        }
+      }
+
+      //Check for types compatible to LoggerPolicyAttribute and have no LogAttribute.
+      customAttributeEnumerator = customAttributeDictionaryTask.GetAnnotationsOfType(typeof(LoggerPolicyAttribute), false);
+      while (customAttributeEnumerator.MoveNext())
+      {
+        // Gets the method to which it applies. 
+        TypeDefDeclaration wovenType = customAttributeEnumerator.Current.TargetElement as TypeDefDeclaration;
+        if (wovenType != null && !perTypeLoggingDatas.ContainsKey(wovenType))
+        {
+          //Weave
+          AddTypeLogginData(wovenType);
+          codeWeaver.AddTypeLevelAdvice(new LogInitializeAdvice(this),
+                    JoinPointKinds.BeforeStaticConstructor,
+                    new Singleton<TypeDefDeclaration>(wovenType));
         }
       }
     }
@@ -326,10 +394,32 @@ namespace Log4PostSharp.Weaver
       /// </summary>
       private readonly LogTask parent;
 
+      private static IDictionary<string, IAnnotationValue> sm_loggerPolicies =
+        new Dictionary<string, IAnnotationValue>();
+
+      public static void InitializeLoggerPolicies(LogTask parent)
+      {
+        //Initialize LoggerPolicyMap
+        var customAttributeDictionaryTask = AnnotationRepositoryTask.GetTask(parent.Project);
+        var customAttributeEnumerator = customAttributeDictionaryTask.GetAnnotationsOfType(typeof(LoggerPolicyAttribute), false);
+        while (customAttributeEnumerator.MoveNext())
+        {
+          TypeDefDeclaration typeDef = customAttributeEnumerator.Current.TargetElement as TypeDefDeclaration;
+          if (typeDef != null)
+          {
+            sm_loggerPolicies[typeDef.Name] = customAttributeEnumerator.Current.Value;
+          }
+        }
+      }
+
+      #region Public Methods
+
       public LogInitializeAdvice(LogTask parent)
       {
         this.parent = parent;
       }
+
+      #endregion
 
       #region IAdvice Members
 
@@ -358,15 +448,37 @@ namespace Log4PostSharp.Weaver
         context.InstructionWriter.AttachInstructionSequence(initializeSequence);
         context.InstructionWriter.EmitSymbolSequencePoint(SymbolSequencePoint.Hidden);
 
-        // Get the declaring type of the constructor.
+
+        IAnnotationValue loggerPolicyAtt;
+        sm_loggerPolicies.TryGetValue(wovenType.Name, out loggerPolicyAtt);
+
+        //Use the helper to get the Logger's name.
         context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(wovenType), context.InstructionWriter);
         // Stack: type.
-        // Get the logger for the method_declaring_type.
-        context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerMethod);
+
+        if (loggerPolicyAtt != null)
+        {
+
+          //Two additional params are needed for this method.
+          LoggerPolicyAttribute att = (LoggerPolicyAttribute)(new CustomAttributeDeclaration(loggerPolicyAtt)).ConstructRuntimeObject();
+          context.InstructionWriter.EmitInstructionInt32(OpCodeNumber.Ldc_I4, (int)att.LoggerNamePolicy);
+          context.InstructionWriter.EmitInstructionInt32(OpCodeNumber.Ldc_I4, (int)att.GenericArgsLoggerNamePolicy);
+          context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.registerLoggerWithPolicyMethod);
+          // Stack: string  (logger name)
+        }
+        else
+        {
+          context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.RegisterLoggerMethod);
+          // Stack: string  (logger name)
+        }
+
+        context.InstructionWriter.EmitInstructionMethod(OpCodeNumber.Call, this.parent.GetLoggerByStringMethod);
         // Stack: logger.
+
         // Assign logger to the log variable.
         context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
         // Stack: .
+
 
         context.InstructionWriter.DetachInstructionSequence();
       }
