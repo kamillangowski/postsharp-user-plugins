@@ -137,7 +137,7 @@ namespace Log4PostSharp
       {
         //If not, generate a new name according to logic specified by the LoggerAttribute.
         StringBuilder accumulator = new StringBuilder();
-        GetLoggerName(type, del, LoggerHelper.DefaultLoggerNamePolicy, accumulator);
+        GetLoggerName(type, del, DefaultLoggerNamePolicy, accumulator);
         loggerName = accumulator.ToString();
 
         //Check for logger name collisions. If there is a collision the name of the logger of the
