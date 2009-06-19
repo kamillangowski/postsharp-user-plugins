@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using PostSharp.CodeModel;
+using PostSharp.CodeModel.TypeSignatures;
 
 namespace Log4PostSharp.Weaver
 {
@@ -223,19 +224,11 @@ namespace Log4PostSharp.Weaver
 
     private static bool IsStringParameter(ParameterDeclaration parameter)
     {
-      if (!parameter.ParameterType.IsGenericDefinition)
-      {
-        Type sysParamType = parameter.ParameterType.GetSystemType(EmptyTypeArray, EmptyTypeArray);
-        if (sysParamType != null)
-        {
-          if (sysParamType.IsByRef)
-          {
-            sysParamType = sysParamType.GetElementType();
-          }
-          return sysParamType == typeof(string);
-        }
-      }
-      return false;
+        ITypeSignature type = parameter.ParameterType;
+        PointerTypeSignature pointerType = type as PointerTypeSignature;
+        if (pointerType != null && pointerType.IsManaged)
+            type = pointerType.ElementType;
+        return IntrinsicTypeSignature.Is( type, IntrinsicType.String );
     }
 
     private static void AddParamsMessageTokens(ICollection<IMessageToken> target,
