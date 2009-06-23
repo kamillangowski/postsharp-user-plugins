@@ -366,7 +366,7 @@ namespace Log4PostSharp.Weaver
       {
         // Gets the method to which it applies. 
         TypeDefDeclaration wovenType = customAttributeEnumerator.Current.TargetElement as TypeDefDeclaration;
-        if (wovenType != null && !perTypeLoggingDatas.ContainsKey(wovenType))
+        if (wovenType != null && !wovenType.IsModuleSpecialType && !perTypeLoggingDatas.ContainsKey(wovenType))
         {
           //Weave
           AddTypeLogginData(wovenType);
