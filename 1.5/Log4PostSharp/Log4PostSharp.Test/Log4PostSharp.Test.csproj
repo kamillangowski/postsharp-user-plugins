@@ -49,6 +49,7 @@
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogAttributeTest.cs" />
     <Compile Include="LoggerAttributeTest.cs" />
     <Compile Include="LoggerPolicyAttributeTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
