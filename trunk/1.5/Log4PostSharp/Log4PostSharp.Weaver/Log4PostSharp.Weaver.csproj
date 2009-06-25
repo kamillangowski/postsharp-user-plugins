@@ -9,6 +9,8 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Log4PostSharp.Weaver</RootNamespace>
     <AssemblyName>Log4PostSharp.Weaver</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Log4PostSharp.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -39,11 +41,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="PostSharp.Core, Version=1.0.7.261, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Core">
       <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Core\bin\debug\PostSharp.Core.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Public">
       <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>

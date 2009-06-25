@@ -2,13 +2,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{ED16B3ED-D807-43DB-AEBA-EAF89604B418}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Log4PostSharp.TestApp</RootNamespace>
     <AssemblyName>Log4PostSharp.TestApp</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\Log4PostSharp.snk</AssemblyOriginatorKeyFile>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -39,7 +41,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Public">
       <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
       <Private>True</Private>
