@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.Test", "Log4P
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.TestApp", "Log4PostSharp.TestApp\Log4PostSharp.TestApp.csproj", "{ED16B3ED-D807-43DB-AEBA-EAF89604B418}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharpDemo", "Log4PostSharpDemo\Log4PostSharpDemo.csproj", "{A210C3D0-A043-46AA-A7A1-82CB89CC51ED}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Log4PostSharp.vsmdi
@@ -44,6 +46,10 @@ Global
 		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ED16B3ED-D807-43DB-AEBA-EAF89604B418}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A210C3D0-A043-46AA-A7A1-82CB89CC51ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A210C3D0-A043-46AA-A7A1-82CB89CC51ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A210C3D0-A043-46AA-A7A1-82CB89CC51ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A210C3D0-A043-46AA-A7A1-82CB89CC51ED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
