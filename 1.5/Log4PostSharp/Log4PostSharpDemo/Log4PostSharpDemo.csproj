@@ -37,11 +37,11 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\log4net.dll</HintPath>
     </Reference>
-    <Reference Include="Log4PostSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="PostSharp.Public, Version=1.0.7.258, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL">
+      <HintPath>$(POSTSHARP_SRC)\Core\PostSharp.Public\bin\debug\PostSharp.Public.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Libraries\Log4PostSharp.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="PostSharp.Public, Version=1.0.10.385, Culture=neutral, PublicKeyToken=b13fd38b8f9c99d7, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
@@ -56,6 +56,16 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Log4PostSharp.Weaver\Log4PostSharp.Weaver.csproj">
+      <Project>{76E28658-EF7A-4695-9C8E-5AA9E5D9B494}</Project>
+      <Name>Log4PostSharp.Weaver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Log4PostSharp\Log4PostSharp.csproj">
+      <Project>{3CFD766D-B991-4444-84A6-49BDFF81CF63}</Project>
+      <Name>Log4PostSharp</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="app.config" />
     <None Include="Log4PostSharpDemo.psproj" />
     <None Include="Properties\Settings.settings">
@@ -63,12 +73,15 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <!-- The following section is conditioned by the presence of the current file
+       in the source tree. If this file is in a binary distribution, the
+       section below will not be executed. Instead, PostSharp should already
+       have been integrated in the default MSBuild process.                       -->
+  <PropertyGroup Condition=" Exists('$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\Release\PostSharp-1.5.targets') ">
+    <DontImportPostSharp>True</DontImportPostSharp>
+    <PostSharpDirectory>$(POSTSHARP_SRC)\Core\PostSharp.MSBuild\bin\Release\</PostSharpDirectory>
+    <PostSharpUseCommandLine>True</PostSharpUseCommandLine>
+  </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+  <Import Project="$(PostSharpDirectory)PostSharp-1.5.targets" />
 </Project>
