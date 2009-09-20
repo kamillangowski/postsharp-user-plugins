@@ -1,19 +1,39 @@
-#Using PostSharp with Gibraltar for painless logging and log analysis.
+#summary Using PostSharp with Gibraltar for painless logging and log analysis.
 
 = Introduction =
 
-GSharp is a set of PostSharp aspects that integrate with Gibraltar -- an application logging, monitoring and profiling tool.
+GSharp is a set of PostSharp aspects that integrate with Gibraltar, a simple, yet powerful application logging, monitoring and profiling tool.
 
-With these aspects you can declaratively add Gibraltar logging to your programs by simply tagging whatever methods, classes or assemblies you wish. This lets you add powerful logging to your applications without the effort, complexity or clutter of writing procedural logging code.
+*[http://bit.ly/gharp Check out this short video tour of using PostSharp and Gibraltar together]*
 
-  * *[GTrace]* logs entry and exit from tagged methods including appropriate message indentation.
-  * *[GTraceField]* logs every change in value of a tagged field.
-  * *[GException]* logs exceptions at the point they are raised. This is a handy safe guard to ensure that both handled and unhandled exceptions are logged by Gibraltar.
-  * *[GTimer]* lets you graph method execution time in Gibraltar providing invaluable information to identify bottlenecks and optimize performance.
+<wiki:video url="http://www.youtube.com/watch?v=UEEO9x1XczU"/>
 
-= Details =
+With these aspects you can add powerful logging to your applications without the effort, complexity or clutter of writing procedural logging code.  Plus, Gibraltar makes it incredibly easy to manage and analyze your logs.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+<table>
+<tr><td>*Attribute*</td><td>*Description*</td></tr>
+<tr><td>`[GTrace]`</td><td>logs entry and exit from tagged methods including appropriate message indentation.</td></tr>
+<tr><td>`[GTraceField]`</td><td>logs every change in value of a tagged field.</td></tr>
+<tr><td>`[GException]`</td><td>logs exceptions at the point they are raised. This is a handy safe guard to ensure that both handled and unhandled exceptions are logged by Gibraltar.</td></tr>
+<tr><td>`[GTimer]`</td><td>lets you graph method execution time in Gibraltar providing invaluable information to identify bottlenecks and optimize performance.</td></tr>
+</table>
+
+= Requirements =
+
+  * [http://www.postsharp.org/download/ PostSharp 1.5]
+  * [https://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar 2.x]
+  * .NET Framework 2.0
+
+----
+
+= Installing GSharp =
+
+  * Download Log4PostSharp [http://postsharp-user-plugins.googlecode.com/svn/trunk/Log4PostSharp/ source code] using an SVN client.
+  * Build the solution using Visual Studio or MSBuild.
+
+
+=== Remarks ===
+
+Use `Multicast` feature of the PostSharp to apply the attribute to all methods in order to log messages with `Debug` level. Besides of this you may additionally decorate chosen methods with `Info` level to log more important messages.
+
+_For questions, please [http://www.gibraltarsoftware.com/About/Contact.aspx contact us!]. We're here to help!_
