@@ -20,9 +20,9 @@ With these aspects you can add powerful logging to your applications without the
 
 == Requirements ==
 
-[http://www.postsharp.org/download postharp 1.5]
-[http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar 2.x]
-.NET Framework 2.0
+  *[http://www.postsharp.org/download postharp 1.5]
+  *[http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar 2.x]
+  *.NET Framework 2.0
 
 == Installing GSharp ==
 
