@@ -30,4 +30,4 @@ In a nutshell, GSharp.zip includes the source code for the GSharp aspects as wel
 
 == Remarks ===
 
-_For questions, please [http://www.gibraltarsoftware.com/About/Contact.aspx contact us!]. We're here to help!_
+_For questions, please [http://www.gibraltarsoftware.com/About/Contact.aspx contact us]. We're here to help!_
