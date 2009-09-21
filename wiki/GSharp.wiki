@@ -19,7 +19,7 @@ With these aspects you can add powerful logging to your applications without the
 </table>
 
 ==Requirements==
-[http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar], [http://www.postsharp.org/download PostSharp] and GSharp on a computer running .NET Framework 2.0 or newer.
+[http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar], [http://www.postsharp.org/download PostSharp] and [http://postsharp-user-plugins.googlecode.com/files/GSharp.zip GSharp] on a computer running .NET Framework 2.0 or newer.
 
 == Installing GSharp ==
 
