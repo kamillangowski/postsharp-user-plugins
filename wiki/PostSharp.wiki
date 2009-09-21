@@ -1,0 +1,3 @@
+#summary PostSharp Overview
+
+It appears that this wiki really wants there to be a PostSharp page.  Before adding it, all references to "PostSharp" were showing up with a ? link offering to create a new page.
