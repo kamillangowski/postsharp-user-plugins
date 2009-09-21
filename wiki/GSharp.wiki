@@ -29,5 +29,4 @@ Once you have Gibraltar and PostSharp installed, all you need to do is [http://p
 In a nutshell, GSharp.zip includes the source code for the GSharp aspects as well as source code for a demo program that illustruates GSharp usage.  When you build and run the program, Gibraltar logs will be created.  You can view these logs in the Gibraltar Analyst.
 
 == Remarks ===
-
-_Please [http://www.gibraltarsoftware.com/About/Contact.aspx contact us] with any questions or suggestions. We're here to help!_
+_[http://www.gibraltarsoftware.com/About/Contact.aspx Contact us] with any questions or suggestions. We're here to help!_
