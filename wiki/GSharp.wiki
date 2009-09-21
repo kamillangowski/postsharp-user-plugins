@@ -25,7 +25,7 @@ With these aspects you can add powerful logging to your applications without the
 == Installing GSharp ==
 [http://postsharp-user-plugins.googlecode.com/files/GSharp.zip Download GSharp.zip] and follow the simple instructions in readme.txt.
 
-In a nutshell, GSharp.zip includes the source code for the GSharp aspects as well as source code for a demo program that illustruates GSharp usage.  When you build and run the program, Gibraltar logs will be created.  You can view these logs in the Gibraltar Analyst.
+GSharp.zip includes source code for the GSharp aspects as well as source code for a demo program that illustruates GSharp usage.  When you build and run the demo program, Gibraltar logs will be created.  You can view these logs in the Gibraltar Analyst.
 
 == Remarks ===
 _[http://www.gibraltarsoftware.com/About/Contact.aspx Contact us] with any questions or suggestions. We're here to help!_
