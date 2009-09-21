@@ -19,7 +19,7 @@ With these aspects you can add powerful logging to your applications without the
 </table>
 
 == Requirements ==
-  * Gibraltar [http://www.gibraltarsoftware.com/Register_Now.aspx download]
+  * Gibraltar&nbsp;[http://www.gibraltarsoftware.com/Register_Now.aspx download]
   * PostSharp [http://www.postsharp.org/download download]
   * .NET Framework 2.0
 
