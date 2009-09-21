@@ -20,11 +20,11 @@ With these aspects you can add powerful logging to your applications without the
 </table>
 
 ==Requirements==
-[http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar], [http://www.postsharp.org/download PostSharp] and [http://postsharp-user-plugins.googlecode.com/files/GSharp.zip GSharp] on a computer running .NET Framework 2.0 or newer.
+Install [http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar] and [http://www.postsharp.org/download PostSharp] on a computer running .NET Framework 2.0 or newer.
 
 == Installing GSharp ==
 
-Once you have Gibraltar and PostSharp installed, just [http://postsharp-user-plugins.googlecode.com/files/GSharp.zip download GSharp.zip] and follow the simple instructions in ReadMe.txt.
+Just [http://postsharp-user-plugins.googlecode.com/files/GSharp.zip download GSharp.zip] and follow the simple instructions in ReadMe.txt.
 
 In a nutshell, GSharp.zip includes the source code for the GSharp aspects as well as source code for a demo program that illustruates GSharp usage.  When you build and run the program, Gibraltar logs will be created.  You can view these logs in the Gibraltar Analyst.
 
