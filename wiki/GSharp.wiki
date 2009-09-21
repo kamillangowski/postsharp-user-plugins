@@ -20,7 +20,7 @@ With these aspects you can add powerful logging to your applications without the
 
 == Requirements ==
 
-  * [http://www.postsharp.org/download/ Post Sharp 1.5]
+  * [http://www.postsharp.org/download Post Sharp 1.5]
   * [https://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar 2.x]
   * .NET Framework 2.0
 
