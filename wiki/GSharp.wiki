@@ -2,7 +2,7 @@
 
 == Introduction ==
 
-GSharp is a set of aspects thatintegratePostSharp with Gibraltar, a simple, yet powerful application logging, monitoring and profiling tool.
+GSharp is a set of aspects that integrate PostSharp with Gibraltar, a simple, yet powerful application logging, monitoring and profiling tool.
 
 *[http://bit.ly/gharp Check out this short video tour of using PostSharp and Gibraltar together]*
 
