@@ -18,7 +18,6 @@ With these aspects you can add powerful logging to your applications without the
 <tr><td>`[GTimer]`</td><td>lets you graph method execution time in Gibraltar providing invaluable information to identify bottlenecks and optimize performance.</td></tr>
 </table>
 
-== Requirements ==
   * [http://www.gibraltarsoftware.com/Register_Now.aspx Gibraltar]
   * [http://www.postsharp.org/download PostSharp]
   * .NET Framework 2.0
