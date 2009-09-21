@@ -1,0 +1,24 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GSharp", "Source\GSharp.csproj", "{D5D85BA9-DB0D-4A18-9F02-77AA29305EDC}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D5D85BA9-DB0D-4A18-9F02-77AA29305EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5D85BA9-DB0D-4A18-9F02-77AA29305EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5D85BA9-DB0D-4A18-9F02-77AA29305EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5D85BA9-DB0D-4A18-9F02-77AA29305EDC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
