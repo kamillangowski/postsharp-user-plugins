@@ -39,20 +39,20 @@ the following attributes:
 
 ==Notes==
 
-  # PostSharp.Laos.dll and PostSharp.Public.dll are part of the PostSharp 1.5.6.626 distribution.
-   * These files are provided for convenience but you should have PostSharp 1.5 installed on your computer.
-  # Gibraltar.Agent.dll is part of the GIbraltar 2.0.478.0 distribution.
+  # !PostSharp.Laos.dll and P!ostSharp.Public.dll are part of the !PostSharp 1.5.6.626 distribution.
+   * These files are provided for convenience but you should have !PostSharp 1.5 installed on your computer.
+  # Gibraltar.Agent.dll is part of the Gibraltar 2.0.478.0 distribution.
    * You will need to install Gibraltar to view the log files created by Gibraltar.Agent.dll
 
 ==Getting Started==
 
-  * After installing PostSharp and Gibraltar, try building and running GSharpDemo.sln. New log sessions should appear automatically in the Gibraltar Analyst.
+  * After installing !PostSharp and Gibraltar, try building and running !GSharpDemo.sln. New log sessions should appear automatically in the Gibraltar Analyst.
 
-  * To integrate GSharp with your program, just add references to the four assemblies from the Dependencies folder.
+  * To integrate !GSharp with your program, just add references to the four assemblies from the Dependencies folder.
 
-  * Then, apply the GSharp attributes as you wish to methods, classes or whole assemblies in your project.
+  * Then, apply the !GSharp attributes as you wish to methods, classes or whole assemblies in your project.
 
-  * Review logs in Gibraltar Analyst and tune which methods you log as deisred using standard PostSharp attribute multicasting techniques.
+  * Review logs in Gibraltar Analyst and tune which methods you log as deisred using standard !PostSharp attribute multicasting techniques.
 
 ==Technical Support==
 
