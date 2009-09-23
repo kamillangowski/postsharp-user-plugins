@@ -18,7 +18,7 @@ the following attributes:
 </table>
 
 ==Prerequisites==
-  * [http://www.postsharp.org/download PostSharp 1.5]
+  * [http://www.postsharp.org/download !PostSharp 1.5]
   * [http://www.gibraltarsoftware.com/Try Gibraltar 2.0]
   * Microsoft .NET Framework 2.0 SP1 (or greater)
 
