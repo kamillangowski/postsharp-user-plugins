@@ -1,6 +1,6 @@
 #summary GSharp ReadMe.txt.
 
-=GSharp ReadMe: PostSharp aspects for Gibraltar=
+=GSharp Readme: PostSharp aspects for Gibraltar=
 
 If you are new to GSharp, you might start by watching a quick video tour of how
 PostSharp and Gibraltar work together to provide painless logging and log analysis.
@@ -11,10 +11,10 @@ If you already have PostSharp and Gibraltar installed, all you need to do
 is add a reference to Gibraltar.GSharp.dll to your project.  This will define
 the following attributes:
 
-<table cellspacing="12px"><tr><td>[GTrace]</td><td>logs entry and exit from tagged methods including appropriate message indentation.</td></tr>
-<tr><td>[GTraceField]</td><td>logs every change in value of a tagged field.</td></tr>
-<tr>><td>[GException]</td><td>logs exceptions at the point they are raised. This is a handy safe guard to ensure that both handled and unhandled exceptions are logged by Gibraltar.</td></tr>
-<tr><td>[GTimer]</td><td>lets you graph method execution time in Gibraltar providing invaluable information to identify bottlenecks and optimize performance.</td></tr>
+<table cellspacing="12px"><tr><td>GTrace</td><td>logs entry and exit from tagged methods including appropriate message indentation.</td></tr>
+<tr><td>GTraceField</td><td>logs every change in value of a tagged field.</td></tr>
+<tr>><td>GException</td><td>logs exceptions at the point they are raised. This is a handy safe guard to ensure that both handled and unhandled exceptions are logged by Gibraltar.</td></tr>
+<tr><td>GTimer</td><td>lets you graph method execution time in Gibraltar providing invaluable information to identify bottlenecks and optimize performance.</td></tr>
 </table>
 
 ==Prerequisites==
@@ -56,5 +56,5 @@ the following attributes:
 
 ==Technical Support==
 
-	email:	[support@gibraltarsoftware.com]
+	email:	[mailto:support@gibraltarsoftware.com]
 	web:	http://www.gibraltarsoftware.com/About/Contact-Us.aspx
