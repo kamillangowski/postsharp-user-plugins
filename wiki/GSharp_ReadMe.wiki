@@ -56,5 +56,6 @@ the following attributes:
 
 ==Technical Support==
 
-  * [mailto:support@gibraltarsoftware.com email]
-  * [http://www.gibraltarsoftware.com/About/Contact-Us.aspx web]
+  email - [mailto:support@gibraltarsoftware.com]
+
+  web - [http://www.gibraltarsoftware.com/About/Contact-Us.aspx]
