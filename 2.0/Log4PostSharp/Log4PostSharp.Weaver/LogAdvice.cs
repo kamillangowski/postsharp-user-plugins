@@ -28,12 +28,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-
-using PostSharp.CodeModel;
-using PostSharp.CodeModel.Helpers;
-using PostSharp.CodeWeaver;
-using PostSharp.Collections;
-using PostSharp.ModuleWriter;
+using PostSharp.Reflection;
+using PostSharp.Sdk.CodeModel;
+using PostSharp.Sdk.CodeWeaver;
+using PostSharp.Sdk.Collections;
 
 namespace Log4PostSharp.Weaver
 {
@@ -89,7 +87,7 @@ namespace Log4PostSharp.Weaver
         throw new ArgumentNullException("afterLoggingSequence");
       }
 
-      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
+      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetCanonicalGenericInstance(perTypeLoggingData.Log));
       emitter.EmitInstructionMethod(OpCodeNumber.Callvirt, logLevelSupportItem.IsLoggingEnabledGetter);
       emitter.EmitInstruction(OpCodeNumber.Ldc_I4_0);
       emitter.EmitInstruction(OpCodeNumber.Ceq);
@@ -127,7 +125,7 @@ namespace Log4PostSharp.Weaver
         throw new ArgumentNullException("message");
       }
 
-      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(log));
+      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetCanonicalGenericInstance(log));
       emitter.EmitInstructionString(OpCodeNumber.Ldstr, message);
       emitter.EmitInstructionMethod(OpCodeNumber.Callvirt, method);
     }
@@ -168,7 +166,7 @@ namespace Log4PostSharp.Weaver
         throw new ArgumentNullException("exception");
       }
 
-      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(log));
+      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetCanonicalGenericInstance(log));
       emitter.EmitInstructionString(OpCodeNumber.Ldstr, message);
       emitter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc_S, exception);
       emitter.EmitInstructionMethod(OpCodeNumber.Callvirt, method);
@@ -211,7 +209,7 @@ namespace Log4PostSharp.Weaver
         throw new ArgumentNullException("args");
       }
 
-      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetFieldCanonicalGenericInstance(log));
+      emitter.EmitInstructionField(OpCodeNumber.Ldsfld, GenericHelper.GetCanonicalGenericInstance(log));
       emitter.EmitInstructionMethod(OpCodeNumber.Call, formatProviderGetter);
       emitter.EmitInstructionString(OpCodeNumber.Ldstr, formatString);
       emitter.EmitInstructionLocalVariable(OpCodeNumber.Ldloc, args);
