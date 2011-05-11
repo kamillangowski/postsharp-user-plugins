@@ -29,8 +29,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
-using PostSharp.CodeModel;
-using PostSharp.CodeModel.TypeSignatures;
+
+using PostSharp.Sdk.CodeModel;
+using PostSharp.Sdk.CodeModel.TypeSignatures;
 
 namespace Log4PostSharp.Weaver
 {

@@ -32,13 +32,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 
 using log4net;
-
-using PostSharp.CodeModel;
-using PostSharp.CodeModel.Helpers;
-using PostSharp.CodeWeaver;
-using PostSharp.Collections;
-using PostSharp.Extensibility;
-using PostSharp.Extensibility.Tasks;
+using PostSharp.Reflection;
+using PostSharp.Sdk.CodeModel;
+using PostSharp.Sdk.CodeWeaver;
+using PostSharp.Sdk.Collections;
+using PostSharp.Sdk.Extensibility;
+using PostSharp.Sdk.Extensibility.Tasks;
 
 namespace Log4PostSharp.Weaver
 {
@@ -268,7 +267,7 @@ namespace Log4PostSharp.Weaver
 
     #region IAdviceProvider Members
 
-    public void ProvideAdvices(PostSharp.CodeWeaver.Weaver codeWeaver)
+    public void ProvideAdvices(PostSharp.Sdk.CodeWeaver.Weaver codeWeaver)
     {
       LogInitializeAdvice.InitializeLoggerPolicies(this);
 
@@ -453,7 +452,7 @@ namespace Log4PostSharp.Weaver
         sm_loggerPolicies.TryGetValue(wovenType.Name, out loggerPolicyAtt);
 
         //Use the helper to get the Logger's name.
-        context.WeavingHelper.GetRuntimeType(GenericHelper.GetTypeCanonicalGenericInstance(wovenType), context.InstructionWriter);
+        context.WeavingHelper.GetRuntimeType(GenericHelper.GetCanonicalGenericInstance(wovenType), context.InstructionWriter);
         // Stack: type.
 
         if (loggerPolicyAtt != null)
@@ -476,7 +475,7 @@ namespace Log4PostSharp.Weaver
         // Stack: logger.
 
         // Assign logger to the log variable.
-        context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetFieldCanonicalGenericInstance(perTypeLoggingData.Log));
+        context.InstructionWriter.EmitInstructionField(OpCodeNumber.Stsfld, GenericHelper.GetCanonicalGenericInstance(perTypeLoggingData.Log));
         // Stack: .
 
 

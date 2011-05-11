@@ -26,8 +26,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using System;
 
-using PostSharp.CodeModel;
-using PostSharp.CodeWeaver;
+using PostSharp.Sdk.CodeModel;
+using PostSharp.Sdk.CodeWeaver;
 
 namespace Log4PostSharp.Weaver
 {

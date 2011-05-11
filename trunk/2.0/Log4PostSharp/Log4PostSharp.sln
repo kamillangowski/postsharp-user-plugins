@@ -20,6 +20,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.TestApp", "Lo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharpDemo", "Log4PostSharpDemo\Log4PostSharpDemo.csproj", "{B4A91017-D332-4CFA-B1AA-261374F33A55}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Log4PostSharp.WebApp", "Log4PostSharp.WebApp\Log4PostSharp.WebApp.csproj", "{D47C757A-3012-4403-9CDA-40F62795886D}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Log4PostSharp.vsmdi
@@ -83,6 +85,16 @@ Global
 		{B4A91017-D332-4CFA-B1AA-261374F33A55}.Release|Mixed Platforms.Build.0 = Release|x86
 		{B4A91017-D332-4CFA-B1AA-261374F33A55}.Release|x86.ActiveCfg = Release|x86
 		{B4A91017-D332-4CFA-B1AA-261374F33A55}.Release|x86.Build.0 = Release|x86
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D47C757A-3012-4403-9CDA-40F62795886D}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
